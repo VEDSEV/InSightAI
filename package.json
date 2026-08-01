@@ -1,0 +1,43 @@
+{
+  "name": "insightai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-first business intelligence for small e-commerce teams.",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": "^22.0.0 || ^24.0.0",
+    "pnpm": ">=11.9.0 <12"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run format:check"
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.3",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.2.12",
+    "postcss": "8.5.25",
+    "prettier": "3.9.6",
+    "tailwindcss": "4.3.3",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

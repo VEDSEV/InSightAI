@@ -1,6 +1,6 @@
 # InsightAI Architecture
 
-**Status:** Phase 0 decision baseline  
+**Status:** Phase 1 application-shell baseline
 **Architecture style:** modular Next.js application with a framework-independent analytics core
 
 ## Goals and constraints
@@ -19,21 +19,21 @@ Key constraints:
 - Windows-compatible local workflow;
 - dependencies added only with an active use case.
 
-## Phase 0 technology decisions
+## Phase 0–1 technology decisions
 
-| Area               | Decision                                          | Reason                                                                                   |
-| ------------------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Web framework      | Next.js 16 App Router                             | Cohesive React application, server/client boundaries, routing, and production build path |
-| Language           | TypeScript with `strict: true`                    | Safer data contracts and refactoring for formula-heavy code                              |
-| Styling            | Tailwind CSS 4 with semantic CSS tokens           | Fast responsive implementation while retaining a controlled design language              |
-| UI components      | shadcn/ui planned, not installed                  | Ownable accessible primitives; defer packages until components are selected              |
-| Charts/icons       | Recharts and Lucide planned, not installed        | Fit expected dashboard needs; no current Phase 0 consumer                                |
-| Validation         | Zod planned for ingestion boundary, not installed | Runtime parsing will be required in Phase 3/5; types alone do not validate uploads       |
-| Testing            | Vitest                                            | Fast TypeScript unit tests for pure analytics; DOM/E2E tools deferred until needed       |
-| Formatting/linting | Prettier and ESLint flat config                   | Explicit, scriptable quality gates compatible with current Next.js conventions           |
-| Persistence        | Supabase deferred to Phase 9                      | Avoid infrastructure before user/project persistence is required                         |
-| Analytics service  | In-process TypeScript first                       | Lowest operational complexity and shared types; preserve a boundary for later extraction |
-| AI                 | Deferred to Phase 7                               | Calculations and evidence contracts must be reliable first                               |
+| Area               | Decision                                                   | Reason                                                                                   |
+| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Web framework      | Next.js 16 App Router                                      | Cohesive React application, server/client boundaries, routing, and production build path |
+| Language           | TypeScript with `strict: true`                             | Safer data contracts and refactoring for formula-heavy code                              |
+| Styling            | Tailwind CSS 4 with semantic CSS tokens                    | Fast responsive implementation while retaining a controlled design language              |
+| UI components      | Small owned primitives using CVA, clsx, and tailwind-merge | Keeps variants explicit and accessible without bulk-generated component code             |
+| Charts/icons       | Lucide icons; local SVG/CSS preview visuals                | Establishes a coherent icon language and honest visual hierarchy without adding Recharts |
+| Validation         | Zod planned for ingestion boundary, not installed          | Runtime parsing will be required in Phase 3/5; types alone do not validate uploads       |
+| Testing            | Vitest, Testing Library, user-event, and jsdom             | Covers component semantics and critical mobile behavior without superficial snapshots    |
+| Formatting/linting | Prettier and ESLint flat config                            | Explicit, scriptable quality gates compatible with current Next.js conventions           |
+| Persistence        | Supabase deferred to Phase 9                               | Avoid infrastructure before user/project persistence is required                         |
+| Analytics service  | In-process TypeScript first                                | Lowest operational complexity and shared types; preserve a boundary for later extraction |
+| AI                 | Deferred to Phase 7                                        | Calculations and evidence contracts must be reliable first                               |
 
 The initial shell uses no remote font request so local and CI production builds do not depend on a
 font CDN.
@@ -65,6 +65,8 @@ src/
 ├── components/
 │   ├── layout/           # Application chrome and layout components
 │   └── ui/               # Reusable accessible primitives
+├── features/
+│   └── dashboard/        # Overview composition, previews, and isolated synthetic UI data
 ├── analytics/            # Pure formulas, grouping, comparison, anomaly, finding rules
 ├── lib/                  # Cross-cutting framework-independent utilities/configuration
 ├── schemas/              # Runtime input schemas and canonical transforms (planned)
@@ -78,6 +80,22 @@ public/                   # Static assets only
 ```
 
 Create planned directories when they have code to own; empty abstractions are not an architecture.
+
+## Phase 1 presentation boundaries
+
+- `components/layout` owns the desktop sidebar, focus-contained mobile navigation, skip link, shared
+  application shell, and top header.
+- `components/ui` owns reusable variants and state primitives such as buttons, cards, badges, select
+  presentations, tooltips, section headers, skeletons, feedback states, and table overflow behavior.
+- `features/dashboard` owns Overview-specific composition, KPI cards, question-led preview visuals,
+  the performance-table preview, and the component state gallery.
+- `features/dashboard/preview-data.ts` is the only source of displayed synthetic business values.
+  It is presentation fixture content, not a dataset and not an analytics input.
+- `analytics` remains unchanged and contains no Phase 1 metrics.
+
+The shell uses Server Components by default. The tooltip and mobile navigation are client boundaries
+because they require focus, keyboard, and disclosure state. Future routes should reuse the shell and
+navigation model rather than duplicate application chrome.
 
 ## Canonical data contract
 
@@ -140,6 +158,10 @@ preference alone is not a sufficient reason.
   synchronization needs justify it.
 - The selected timezone, inclusive/exclusive date semantics, and comparison mode are part of filter
   context, not hidden globals.
+- Phase 1 filter controls are visibly labeled preview controls and remain disabled. They must not
+  acquire local mock filtering logic that could drift from the Phase 3 analytics engine.
+- Mobile-navigation disclosure state is local UI state. Opening the dialog moves focus inside, traps
+  keyboard focus, locks body scroll, supports Escape, and restores focus to the trigger on close.
 
 ## Future persistence model
 

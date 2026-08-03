@@ -1,27 +1,91 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f8fb;
-  --foreground: #172033;
+  --background: #f6f7fa;
   --surface: #ffffff;
+  --surface-elevated: #ffffff;
+  --surface-subtle: #f0f2f6;
+  --foreground: #172033;
   --muted-foreground: #62708a;
   --border: #dfe4ec;
-  --accent: #5b5bd6;
+  --border-strong: #c8d0dd;
+  --primary: #5454c7;
+  --primary-hover: #4646aa;
+  --primary-strong: #3f3f9b;
+  --primary-soft: #ededff;
   --success: #16875d;
-  --shadow-card: 0 16px 45px -28px rgb(22 32 51 / 0.35);
+  --success-strong: #0f6948;
+  --success-soft: #e7f6ef;
+  --warning: #a15c00;
+  --warning-strong: #7a4500;
+  --warning-soft: #fff3dc;
+  --destructive: #c23a43;
+  --destructive-strong: #9d2933;
+  --destructive-soft: #fff0f1;
+  --info: #2563a8;
+  --focus: #5454c7;
+  --chart-1: #5b5bd6;
+  --chart-2: #2d7fb8;
+  --chart-3: #16875d;
+  --chart-4: #b36b23;
+  --chart-5: #8b5cb8;
+  --radius-control-value: 0.625rem;
+  --radius-button-value: 0.75rem;
+  --radius-card-value: 1rem;
+  --radius-tooltip-value: 0.625rem;
+  --shadow-control-value: 0 1px 2px rgb(22 32 51 / 0.05);
+  --shadow-button-value: 0 3px 8px -4px rgb(63 63 155 / 0.5);
+  --shadow-card-value: 0 12px 28px -22px rgb(22 32 51 / 0.35);
+  --shadow-card-hover-value: 0 18px 38px -24px rgb(22 32 51 / 0.4);
+  --shadow-overlay-value: 0 24px 60px -20px rgb(22 32 51 / 0.35);
+  --duration-fast-value: 140ms;
+  --duration-base-value: 220ms;
+  --duration-slow-value: 320ms;
 }
 
 @theme inline {
   --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-surface-elevated: var(--surface-elevated);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-foreground: var(--foreground);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --color-accent: var(--accent);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
+  --color-primary-soft: var(--primary-soft);
   --color-success: var(--success);
+  --color-success-strong: var(--success-strong);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-strong: var(--warning-strong);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-strong: var(--destructive-strong);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-info: var(--info);
+  --color-focus: var(--focus);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
   --font-sans:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --shadow-card: var(--shadow-card);
+  --radius-control: var(--radius-control-value);
+  --radius-button: var(--radius-button-value);
+  --radius-card: var(--radius-card-value);
+  --radius-tooltip: var(--radius-tooltip-value);
+  --shadow-control: var(--shadow-control-value);
+  --shadow-button: var(--shadow-button-value);
+  --shadow-card: var(--shadow-card-value);
+  --shadow-card-hover: var(--shadow-card-hover-value);
+  --shadow-overlay: var(--shadow-overlay-value);
+  --duration-fast: var(--duration-fast-value);
+  --duration-base: var(--duration-base-value);
+  --duration-slow: var(--duration-slow-value);
 }
 
 * {
@@ -31,35 +95,74 @@
 html {
   background: var(--background);
   color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  background:
-    radial-gradient(circle at 75% 0%, rgb(91 91 214 / 0.08), transparent 32rem), var(--background);
+  background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
+button,
+select,
+summary {
+  font: inherit;
+}
+
 ::selection {
-  background: rgb(91 91 214 / 0.18);
+  background: rgb(84 84 199 / 0.18);
 }
 
 :focus-visible {
-  outline: 3px solid rgb(91 91 214 / 0.35);
+  outline: 3px solid rgb(84 84 199 / 0.3);
   outline-offset: 3px;
 }
 
+.skeleton-shimmer {
+  background: linear-gradient(
+    100deg,
+    var(--surface-subtle) 20%,
+    var(--surface) 38%,
+    var(--surface-subtle) 56%
+  );
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
-    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .skeleton-shimmer {
+    background: var(--surface-subtle);
+  }
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 2px solid CanvasText;
   }
 }

@@ -1,6 +1,6 @@
 # InsightAI Design System
 
-**Status:** Phase 0 design direction; component implementation begins in Phase 1
+**Status:** Phase 1 implementation baseline
 
 ## Experience principles
 
@@ -21,16 +21,18 @@ copying another product's composition or visual identity.
 
 ## Color tokens
 
-The Phase 0 shell establishes a light theme. Values may be tuned during accessible component and chart
-testing; semantic names are the stable contract.
+The Phase 1 shell implements a light theme in `src/app/globals.css`. Semantic names are the stable
+contract; components consume Tailwind utilities backed by these CSS variables rather than duplicating
+literal values.
 
 ### Core surfaces and text
 
 | Token              | Initial value | Use                                                               |
 | ------------------ | ------------- | ----------------------------------------------------------------- |
-| `background`       | `#F7F8FB`     | Application canvas                                                |
+| `background`       | `#F6F7FA`     | Application canvas                                                |
 | `surface`          | `#FFFFFF`     | Cards, popovers, panels                                           |
-| `surface-subtle`   | `#F0F2F7`     | Secondary regions and hover fills                                 |
+| `surface-elevated` | `#FFFFFF`     | Layered menus and overlays                                        |
+| `surface-subtle`   | `#F0F2F6`     | Secondary regions and hover fills                                 |
 | `foreground`       | `#172033`     | Primary text                                                      |
 | `muted-foreground` | `#62708A`     | Secondary text; not for tiny low-contrast labels without checking |
 | `border`           | `#DFE4EC`     | Default dividers and outlines                                     |
@@ -38,15 +40,15 @@ testing; semantic names are the stable contract.
 
 ### Brand and semantic states
 
-| Token          | Initial value | Use                                                 |
-| -------------- | ------------- | --------------------------------------------------- |
-| `accent`       | `#5B5BD6`     | Brand accent, selected state, primary action        |
-| `accent-hover` | `#4949BC`     | Hover/active action                                 |
-| `accent-soft`  | `#EEEEFF`     | Selected background and subtle emphasis             |
-| `success`      | `#16875D`     | Confirmed success/positive status                   |
-| `warning`      | `#A15C00`     | Caution and data-quality warning                    |
-| `danger`       | `#C23A43`     | Error, destructive action, verified negative status |
-| `info`         | `#2563A8`     | Neutral informational state                         |
+| Token           | Initial value | Use                                                 |
+| --------------- | ------------- | --------------------------------------------------- |
+| `primary`       | `#5454C7`     | Brand accent, selected state, primary action        |
+| `primary-hover` | `#4646AA`     | Hover/active action                                 |
+| `primary-soft`  | `#EDEDFF`     | Selected background and subtle emphasis             |
+| `success`       | `#16875D`     | Confirmed success/positive status                   |
+| `warning`       | `#A15C00`     | Caution and data-quality warning                    |
+| `destructive`   | `#C23A43`     | Error, destructive action, verified negative status |
+| `info`          | `#2563A8`     | Neutral informational state                         |
 
 Color is never the only carrier of status. Pair it with text, an icon, shape, or pattern. Positive and
 negative chart colors describe direction only when direction is semantically good/bad; revenue decline
@@ -57,7 +59,7 @@ Dark theme is a future enhancement, not a Phase 1 requirement. Do not create a p
 ## Typography
 
 - **Font stack:** Inter when bundled locally in a future phase, then system sans-serif fallbacks.
-  Phase 0 deliberately uses the system stack to keep builds network-independent.
+  Phase 1 deliberately uses the system stack to keep builds network-independent.
 - **Display:** 48–60 px desktop / 36–44 px compact, weight 600, tight tracking, balanced wrapping.
 - **Page title:** 30–36 px, weight 600.
 - **Section title:** 20–24 px, weight 600.
@@ -116,7 +118,7 @@ section surface.
 
 ## Buttons
 
-- **Primary:** accent fill, white text, for the one leading action in a region.
+- **Primary:** primary-token fill, white text, for the one leading action in a region.
 - **Secondary:** surface fill, visible border, foreground text.
 - **Ghost:** transparent, with a clear hover/focus surface for low-emphasis actions.
 - **Destructive:** danger treatment and confirmation proportional to reversibility.
@@ -237,11 +239,24 @@ Breakpoints are content decisions, not device labels. KPI grids should move from
 columns only when labels and comparison text remain readable. Data tables may use controlled
 horizontal scrolling with sticky identity columns; the page itself should not overflow.
 
-## Phase 1 implementation checklist
+## Phase 1 implementation decisions
 
-- Convert tokens to a complete CSS theme and document any changed contrast values.
-- Add shadcn/ui primitives individually and remove unused generated examples.
-- Build component state matrices before composing the dashboard shell.
-- Add an accessibility test setup appropriate to interactive components.
-- Verify compact, tablet, desktop, zoom, forced-colors, and reduced-motion states.
-- Use structural placeholder labels rather than fake business numbers.
+- **Component strategy:** small local primitives use CVA for variants and `cn` composition. shadcn/ui
+  was not installed because the phase did not require a generated primitive.
+- **Token strategy:** colors, radii, shadows, and motion durations originate in global semantic CSS
+  variables and are mapped into Tailwind theme utilities.
+- **Sample-data labeling:** all preview business values are centralized in one typed module and
+  labeled as “Sample workspace,” “Demonstration data,” or “Demo” across the page hierarchy.
+- **Responsive shell:** persistent 264 px desktop navigation begins at `lg`; below it, a focus-contained
+  modal navigation panel is used. KPI cards reflow from one to two to four columns, controls wrap, and
+  the table has intentional horizontal overflow.
+- **Motion:** card, navigation, button, tooltip, and disclosure transitions use 140–220 ms tokens.
+  Skeleton shimmer is the only repeating motion and becomes a static fill under reduced motion.
+- **Accessibility:** native landmarks and controls, skip link, logical headings, `aria-current`,
+  `aria-disabled`, accessible icon names, visible focus, text-plus-icon status, SVG text alternatives,
+  and feedback live-region semantics are implemented and component-tested.
+- **State coverage:** loading, empty, error, and sample-data states share visual and semantic patterns;
+  a collapsed non-production state gallery supports review without dominating the dashboard.
+
+Deferred: dark theme, count-up animation, production chart interactions, functioning filters, user
+preferences, density modes, and formal cross-browser/assistive-technology regression automation.

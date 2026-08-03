@@ -16,6 +16,8 @@ omitted until capacity and review cadence are known.
 
 ## Phase 0 — Product definition and repository setup
 
+**Status:** Complete and approved; initial foundation commit created 2026-08-01.
+
 **Goal:** establish a reviewable product and engineering foundation without implying that analytics
 features already exist.
 
@@ -36,6 +38,8 @@ features already exist.
 
 ## Phase 1 — Dashboard shell and design system
 
+**Status:** Complete; awaiting Phase 1 review.
+
 **Goal:** create the accessible visual and interaction framework that later receives real analytics.
 
 **Deliverables**
@@ -54,6 +58,8 @@ features already exist.
 - No hard-coded values can be mistaken for calculated business performance.
 
 ## Phase 2 — Realistic order-level sample dataset
+
+**Status:** Recommended next phase; not started.
 
 **Goal:** provide a safe, documented dataset with enough variation to exercise real analytical cases.
 
@@ -225,4 +231,5 @@ At the end of each phase, review:
 4. risks introduced, retired, or re-ranked;
 5. whether the proposed next-phase dependency and architecture choices still hold.
 
-Phase 1 must not begin until the repository owner approves the Phase 0 foundation.
+Phase 2 must not begin until the repository owner approves the Phase 1 shell, preview-data boundary,
+and responsive/accessibility evidence.

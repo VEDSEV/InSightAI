@@ -13,9 +13,9 @@ these outputs but must never calculate, overwrite, repair, or silently infer the
 
 ### Grain
 
-One row represents one order line for one product. `order_id` may repeat for multi-product orders.
-`revenue`, `cost`, and `marketing_spend` are row totals, not unit values. `quantity` describes the
-number of product units on that line.
+One row represents one order line for one product. `order_line_id` is unique, while `order_id` may
+repeat for multi-product orders. `revenue`, `cost`, `discount_amount`, and `marketing_spend` are row
+totals, not unit values. `quantity` describes the number of product units on that line.
 
 This grain prevents product analysis from relying on arbitrary allocation after ingestion. An upload
 that is truly one row per order can still map to the contract when each order has only one product;
@@ -23,19 +23,26 @@ mixed-grain input must be rejected or explicitly transformed.
 
 ### Initial fields
 
-| Field             | Type after validation | Required | Meaning and initial constraint                                                                      |
-| ----------------- | --------------------- | -------- | --------------------------------------------------------------------------------------------------- |
-| `order_id`        | string                | Yes      | Non-empty opaque order identifier; distinct count defines orders                                    |
-| `order_date`      | date                  | Yes      | Calendar date interpreted in the dataset timezone; no time-of-day in MVP                            |
-| `customer_id`     | string                | Yes      | Non-empty opaque identifier; no direct personal information                                         |
-| `product`         | string                | Yes      | Normalized display name; non-empty                                                                  |
-| `category`        | string                | Yes      | Normalized product category; use explicit `Uncategorized` only through a documented mapping         |
-| `region`          | string                | Yes      | Normalized business region; semantic definition supplied by dataset owner                           |
-| `sales_channel`   | string                | Yes      | Normalized channel such as web, marketplace, or retail                                              |
-| `quantity`        | integer               | Yes      | Positive in the initial schema; returns/refunds are not yet modeled                                 |
-| `revenue`         | finite decimal        | Yes      | Row revenue after discounts, before any excluded tax/shipping rules; must be non-negative initially |
-| `cost`            | finite decimal        | Yes      | Total cost of goods for the row; must be non-negative initially                                     |
-| `marketing_spend` | finite decimal        | Yes      | Spend uniquely allocated to this row; must be non-negative and never repeated across rows           |
+| Field              | Type after validation | Required | Meaning and initial constraint                                                                                  |
+| ------------------ | --------------------- | -------- | --------------------------------------------------------------------------------------------------------------- |
+| `order_line_id`    | string                | Yes      | Non-empty stable line identifier; unique at canonical grain                                                     |
+| `order_id`         | string                | Yes      | Non-empty opaque order identifier; distinct count defines orders                                                |
+| `order_date`       | date                  | Yes      | Calendar date interpreted in the dataset timezone; no time-of-day in MVP                                        |
+| `customer_id`      | string                | Yes      | Non-empty opaque identifier; no direct personal information                                                     |
+| `customer_segment` | string or null        | No       | Optional segment context; null means not reported and must not remove the row from whole-dataset metrics        |
+| `product_id`       | string                | Yes      | Stable normalized product identifier                                                                            |
+| `product_name`     | string                | Yes      | Normalized display name associated with `product_id`; non-empty                                                 |
+| `category`         | string                | Yes      | Normalized product category; use explicit `Uncategorized` only through a documented mapping                     |
+| `region`           | string                | Yes      | Normalized business region; semantic definition supplied by dataset owner                                       |
+| `sales_channel`    | string                | Yes      | Normalized channel such as web, marketplace, or retail                                                          |
+| `quantity`         | integer               | Yes      | Positive in the initial schema; returns/refunds are not yet modeled                                             |
+| `unit_price`       | finite decimal        | Yes      | Non-negative catalog/unit selling value before line discount                                                    |
+| `unit_cost`        | finite decimal        | Yes      | Non-negative cost of goods per unit                                                                             |
+| `discount_amount`  | finite decimal        | Yes      | Explicit non-negative total line discount; cannot exceed `quantity × unit_price`                                |
+| `revenue`          | finite decimal        | Yes      | `quantity × unit_price − discount_amount`, before excluded tax/shipping rules; non-negative                     |
+| `cost`             | finite decimal        | Yes      | `quantity × unit_cost`; non-negative                                                                            |
+| `campaign`         | string or null        | No       | Optional acquisition/retention context; null means unattributed/not reported and does not imply zero spend      |
+| `marketing_spend`  | finite decimal        | Yes      | Spend uniquely allocated to this row; non-negative and never repeated across sibling lines or other allocations |
 
 ### Dataset-level metadata
 
@@ -48,6 +55,10 @@ The calculation context must also provide:
 - input, accepted, rejected, and warning row counts;
 - mapping/transformation version and analytics specification version;
 - confirmation of cost, revenue, and marketing-spend semantics.
+
+The Phase 2 fixture additionally records generator version, source revision, fixed seed, scenario
+manifest, independent control totals, distribution profile, and CSV SHA-256. These are
+dataset-development metadata, not row fields or production analytics outputs.
 
 Mixed currencies are unsupported in the initial contract. They must not be summed without an
 explicit, dated exchange-rate policy in a future specification.
@@ -64,11 +75,26 @@ explicit, dated exchange-rate policy in a future specification.
   before aggregation.
 - Reject NaN, infinity, blank required values, impossible dates, non-integer quantities, and values
   outside declared constraints.
+- Preserve blank optional `customer_segment` and `campaign` values as null. Whole-dataset metrics
+  retain those rows. Dimension breakdowns may map null to an explicit `Unknown` or `Unattributed`
+  member, but must not silently drop rows or infer a value. Missing campaign context does not change
+  `marketing_spend`; missing segment context does not change distinct-order repeat classification.
 - Dimension normalization may merge case/whitespace variants after showing the proposed result.
-- Duplicate detection uses the eventual stable line identifier or a documented compound key. A
-  repeated `order_id` alone is not a duplicate because the grain is an order line.
-- The MVP does not silently model returns, refunds, tax, shipping, discounts, or inventory. Data that
-  requires those semantics must be rejected or marked unsupported until the schema evolves.
+- Duplicate detection uses `order_line_id`. A repeated `order_id` alone is not a duplicate because
+  the grain is an order line.
+- The initial contract supports only an explicit line-level `discount_amount` that reconciles to
+  revenue. It does not silently model returns, refunds, cancellations, tax, shipping, fees, or
+  inventory. Data requiring those semantics must be rejected or marked unsupported until the schema
+  evolves.
+
+### Phase 2 marketing allocation
+
+The synthetic fixture calculates one order-level marketing amount from order revenue and the
+configured campaign rate, then writes the full amount to the order's first line while every sibling
+line receives zero. This makes the order allocation exact and auditable without adding a second
+marketing table. It preserves channel-level totals but should not be interpreted as product-level
+attribution. Future external datasets may use another documented allocation method, but every unit of
+spend must still be represented exactly once before marketing ROI is available.
 
 ## Filter context
 
@@ -226,13 +252,13 @@ descending by the primary value with normalized name ascending as a stable tie-b
 ### Revenue by product
 
 ```text
-for each product: Σ row.revenue
+for each product_id: Σ row.revenue
 ```
 
 ### Profit by product
 
 ```text
-for each product: Σ (row.revenue - row.cost)
+for each product_id: Σ (row.revenue - row.cost)
 ```
 
 Include revenue and profit margin alongside profit in the result so the UI can provide context.
@@ -424,8 +450,8 @@ Phase 3 must include at least:
 
 ## Known limitations requiring future schema versions
 
-- returns, refunds, cancellations, tax, shipping revenue/cost, discounts, fees, and overhead;
-- order-line identifiers and product SKUs distinct from display names;
+- returns, refunds, cancellations, tax, shipping revenue/cost, fees, and overhead;
+- discount types, coupon funding, stacked discounts, and allocations not expressed as one line total;
 - quantity of zero or negative adjustment records;
 - multiple currencies and exchange rates;
 - customer history outside the selected dataset;

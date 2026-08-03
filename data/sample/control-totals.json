@@ -1,0 +1,56 @@
+{
+  "datasetVersion": "insightai-synthetic-orders-v1",
+  "generatorVersion": "1.1.0",
+  "sourceRevision": "phase2-generator-v1.1",
+  "seed": 20260803,
+  "currency": "USD",
+  "timezone": "America/Chicago",
+  "dateRange": {
+    "start": "2024-01-01",
+    "end": "2025-12-31"
+  },
+  "csvSha256": "66f237491182dd1e8ae2c786543e98b3157f27658e7e5c11bfa8cec07de9c5e8",
+  "rowCount": 6909,
+  "distinctOrderCount": 4310,
+  "multiLineOrderCount": 1939,
+  "distinctCustomerCount": 1200,
+  "totalQuantity": 9044,
+  "totalRevenue": 778231.1,
+  "totalCost": 460417,
+  "totalGrossProfit": 317814.1,
+  "overallGrossMargin": 0.40838,
+  "totalMarketingSpend": 73402.21,
+  "totalDiscount": 25222.9,
+  "negativeMarginRowCount": 52,
+  "negativeMarginProductCount": 1,
+  "productsWithAnyNegativeMarginRowCount": 2,
+  "repeatCustomerDefinition": "Customer has at least two distinct order_id values across the full dataset period.",
+  "oneTimeCustomerCount": 683,
+  "repeatCustomerCount": 517,
+  "repeatCustomerRate": 0.430833,
+  "missingOptionalFields": {
+    "customerSegmentRowCount": 298,
+    "customerSegmentCustomerCount": 47,
+    "campaignRowCount": 209,
+    "campaignOrderCount": 117
+  },
+  "revenueByCategory": {
+    "Gifting": 25932.18,
+    "Home": 290171.66,
+    "Kitchen": 232535.1,
+    "Outdoor": 64676.94,
+    "Wellness": 95686.86,
+    "Workspace": 69228.36
+  },
+  "revenueByRegion": {
+    "Central": 184718.26,
+    "East": 193222.1,
+    "South": 117000.82,
+    "West": 283289.92
+  },
+  "revenueByChannel": {
+    "Marketplace": 202380.52,
+    "Retail Pop-up": 96154.48,
+    "Web": 479696.1
+  }
+}

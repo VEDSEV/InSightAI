@@ -18,6 +18,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "generate:sample-data": "node --experimental-strip-types scripts/generate-sample-data.ts",
+    "verify:sample-data": "node --experimental-strip-types scripts/verify-sample-data.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run format:check"

@@ -38,7 +38,7 @@ features already exist.
 
 ## Phase 1 — Dashboard shell and design system
 
-**Status:** Complete; awaiting Phase 1 review.
+**Status:** Complete and approved; Phase 1 commit synchronized with GitHub.
 
 **Goal:** create the accessible visual and interaction framework that later receives real analytics.
 
@@ -59,7 +59,7 @@ features already exist.
 
 ## Phase 2 — Realistic order-level sample dataset
 
-**Status:** Recommended next phase; not started.
+**Status:** Complete; realism and coverage revision awaiting review.
 
 **Goal:** provide a safe, documented dataset with enough variation to exercise real analytical cases.
 
@@ -67,8 +67,11 @@ features already exist.
 
 - Synthetic order-line CSV using the canonical schema.
 - Generator or reproducible creation process, data dictionary, provenance note, and checksum.
-- Known scenarios: repeat customers, seasonality, multiple channels/regions, negative-margin products,
-  high-revenue low-margin products, declines, missing optional dimensions, and controlled anomalies.
+- Machine-readable and human-readable distribution profiles with configured optional-dimension
+  missingness and generator-derived repeat-customer frequency.
+- Known scenarios: repeat customers, category-sensitive seasonality, channel/region variation,
+  negative-margin and high-revenue low-margin products, concentration, declines, controlled anomalies,
+  and uniquely allocated marketing spend.
 
 **Acceptance criteria**
 
@@ -77,8 +80,12 @@ features already exist.
 - Each designed scenario is traceable to specific fixture rows without making the dashboard outcome
   a hidden hard-coded constant.
 - Grain, date range, currency assumption, and marketing-spend semantics are explicit.
+- Required fields remain complete; optional missingness and all three margin cases are independently
+  verified and documented.
 
 ## Phase 3 — Deterministic analytics engine
+
+**Status:** Recommended next phase; not started.
 
 **Goal:** implement the analytics specification as framework-independent, tested functions.
 
@@ -233,3 +240,6 @@ At the end of each phase, review:
 
 Phase 2 must not begin until the repository owner approves the Phase 1 shell, preview-data boundary,
 and responsive/accessibility evidence.
+
+Phase 3 must not begin until the repository owner approves the Phase 2 generator, canonical schema
+clarifications, control totals, scenario thresholds, checksum, and independent validation evidence.

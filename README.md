@@ -4,9 +4,11 @@ InsightAI is an evidence-first business intelligence platform for small e-commer
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phase 1 dashboard shell and design system complete and awaiting review. The
-> application displays a clearly labeled sample workspace with centralized synthetic preview values.
-> It contains no production analytics, uploaded business data, or AI features.
+> **Current status:** Phase 2 synthetic order-line dataset realism revision complete and awaiting
+> review. The repository now includes a reproducible, documented, independently verified synthetic
+> CSV plus machine-readable and human-readable distribution profiles. The
+> application still displays the separate Phase 1 preview workspace and contains no production
+> analytics, uploaded business data, or AI features.
 
 ## Product principles
 
@@ -26,6 +28,11 @@ small owned UI primitives with controlled variants, Lucide icons, accessible app
 and behavior-focused component tests. Preview visuals use local SVG/CSS and do not require a charting
 runtime. Recharts remains deferred until real visualization behavior is in scope; Zod will enter with
 dataset validation. Supabase is deferred until authentication and persistence are in scope.
+
+Phase 2 adds a framework-independent TypeScript generator under `scripts/sample-data`. Configuration,
+catalog/customer rules, scenarios, serialization, generation-time validation, machine controls,
+distribution profiling, and independent CSV verification are separate modules. No dataset code is
+imported into the UI or `src/analytics`.
 
 Analytics is a separate source boundary inside `src/analytics`. Its future pure functions will accept
 canonical validated rows and return typed metric results with context and quality metadata. A
@@ -49,9 +56,10 @@ See [Architecture](docs/ARCHITECTURE.md), [Analytics specification](docs/ANALYTI
 
 ```text
 InsightAI/
-├── data/sample/             # Synthetic sample data and its documentation (Phase 2)
+├── data/sample/             # Generated CSV, controls, checksum, and documentation
 ├── docs/                    # Product, architecture, analytics, design, and safety decisions
 ├── public/                  # Static brand assets
+├── scripts/sample-data/     # Deterministic generator and independent verification modules
 ├── src/
 │   ├── analytics/           # Pure deterministic business calculations (Phase 3)
 │   ├── app/                 # Next.js App Router entry points
@@ -90,7 +98,7 @@ Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-No environment variables are required in Phase 1. Open `http://localhost:3000` after the development
+No environment variables are required in Phase 2. Open `http://localhost:3000` after the development
 server starts.
 
 ### OneDrive development note
@@ -108,6 +116,8 @@ pnpm typecheck
 pnpm test
 pnpm format:check
 pnpm build
+pnpm generate:sample-data
+pnpm verify:sample-data
 ```
 
 `pnpm check` runs linting, type checking, tests, and formatting checks together. The production build
@@ -119,8 +129,8 @@ remains a separate explicit gate.
 | ----- | -------- | ---------------------------------------------------------------------------------- |
 | 0     | Complete | Product definition, documented contracts, toolchain, and minimal application shell |
 | 1     | Complete | Accessible dashboard shell and reusable design-system primitives                   |
-| 2     | Next     | Realistic, synthetic order-line dataset with known edge cases                      |
-| 3     | Planned  | Tested deterministic analytics engine                                              |
+| 2     | Complete | Reproducible synthetic order-line dataset, controls, and scenarios                 |
+| 3     | Next     | Tested deterministic analytics engine                                              |
 | 4     | Planned  | Interactive filters and evidence-linked visualizations                             |
 | 5     | Planned  | File upload, validation, cleaning, and column mapping                              |
 | 6     | Planned  | Rule-based findings, risks, and opportunities                                      |
@@ -131,12 +141,19 @@ remains a separate explicit gate.
 
 Detailed entry and exit criteria are in [the roadmap](docs/ROADMAP.md).
 
-## Phase 1 sample-data boundary
+## Dataset and UI-preview boundary
 
 All values shown in the Overview page are synthetic UI-preview content centralized in
 `src/features/dashboard/preview-data.ts`. The page repeats “Sample workspace” and “Demonstration data”
 labels at the shell, page, chart, and table levels. Preview modules do not import from or write to
 `src/analytics`, and disabled filters explain which later phase will make them functional.
+
+The generated Phase 2 CSV is documented in [the sample-data guide](data/sample/README.md), with a
+[data dictionary](data/sample/DATA_DICTIONARY.md), [scenario guide](data/sample/SCENARIOS.md),
+[control totals](data/sample/CONTROL_TOTALS.md),
+[distribution profile](data/sample/DISTRIBUTION_PROFILE.md), and
+[provenance statement](data/sample/PROVENANCE.md).
+It is a development fixture for Phase 3 and is not wired into the dashboard.
 
 ## Portfolio relevance
 
@@ -165,10 +182,10 @@ judgment reviewable.
 
 ## Scope guardrails
 
-Phase 1 deliberately excludes the order-level sample dataset, production analytics, functioning
+Phase 2 deliberately excludes the deterministic analytics engine, production charts, functioning
 filters, uploaded data, authoritative findings, persistence, authentication, external services, and
-AI. Synthetic preview values must remain centralized and unmistakably labeled. New dependencies
-should be added only when the phase being implemented needs them.
+AI. Synthetic source rows, calculated dataset fields, future analytics outputs, and future AI outputs
+remain distinct. No dependencies were added for Phase 2.
 
 ## License
 

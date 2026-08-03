@@ -1,0 +1,387 @@
+{
+  "datasetVersion": "insightai-synthetic-orders-v1",
+  "generatorVersion": "1.1.0",
+  "scenarios": [
+    {
+      "id": "seasonality",
+      "name": "Category-sensitive holiday seasonality",
+      "purpose": "Exercise daily and category trend comparisons without perfectly uniform seasonality.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-11-01",
+          "end": "2024-12-31"
+        },
+        {
+          "start": "2025-11-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "categories": [
+          "Gifting",
+          "Home",
+          "Kitchen"
+        ]
+      },
+      "expectedDirectionalResult": "Average daily holiday revenue exceeds January-February revenue, with a stronger multiplier in Gifting than in nonseasonal categories.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0002567",
+          "LINE-0002568",
+          "LINE-0002576",
+          "LINE-0002579",
+          "LINE-0002582",
+          "LINE-0002599",
+          "LINE-0002605",
+          "LINE-0002608"
+        ],
+        "observed": {
+          "holidayToWinterDailyRevenueRatio": 1.797399,
+          "giftingHolidayToWinterDailyRevenueRatio": 4.728514
+        }
+      }
+    },
+    {
+      "id": "repeat-customers",
+      "name": "One-time and returning customer mix",
+      "purpose": "Support distinct-order repeat-customer behavior at order-line grain.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-01-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "customerSegments": [
+          "Loyal",
+          "Occasional",
+          "New"
+        ]
+      },
+      "expectedDirectionalResult": "Segment-specific fixed propensities produce both one-time and repeat customers without an exact half split; segment labels describe propensity, not observed order count.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000001",
+          "LINE-0000002",
+          "LINE-0000003",
+          "LINE-0000004",
+          "LINE-0000005",
+          "LINE-0000006",
+          "LINE-0000007",
+          "LINE-0000008"
+        ],
+        "customerIds": [
+          "CUST-0233",
+          "CUST-0152",
+          "CUST-1151",
+          "CUST-0221",
+          "CUST-0257",
+          "CUST-0217",
+          "CUST-0548",
+          "CUST-0950"
+        ],
+        "observed": {
+          "repeatCustomerCount": 517,
+          "repeatCustomerRate": 0.430833,
+          "oneTimeCustomerCount": 683,
+          "generationMechanism": "Seeded Bernoulli draw per customer using segment repeatProbability; eligible customers receive a second order and weighted subsequent orders."
+        }
+      }
+    },
+    {
+      "id": "regional-variation",
+      "name": "Strong West and declining South",
+      "purpose": "Provide regional strength and underperformance cases for comparison logic.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-07-01",
+          "end": "2024-12-31"
+        },
+        {
+          "start": "2025-07-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "regions": [
+          "West",
+          "South"
+        ]
+      },
+      "expectedDirectionalResult": "West leads full-period revenue while South declines in the second half of 2025 versus the same 2024 window.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000003",
+          "LINE-0000009",
+          "LINE-0000010",
+          "LINE-0000011",
+          "LINE-0004968",
+          "LINE-0004971",
+          "LINE-0004972",
+          "LINE-0004973"
+        ],
+        "observed": {
+          "westRevenue": 283289.92,
+          "southH2RevenueChange": -0.497377
+        }
+      }
+    },
+    {
+      "id": "channel-variation",
+      "name": "Channel growth and efficiency variation",
+      "purpose": "Support channel mix, growth, and contribution-after-spend comparisons.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-01-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "channels": [
+          "Web",
+          "Marketplace",
+          "Retail Pop-up"
+        ]
+      },
+      "expectedDirectionalResult": "Web has the largest revenue share and Marketplace produces the weakest contribution-after-spend ROI.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000108",
+          "LINE-0000109",
+          "LINE-0000110",
+          "LINE-0000115",
+          "LINE-0000128",
+          "LINE-0000153",
+          "LINE-0000154",
+          "LINE-0000159"
+        ],
+        "observed": {
+          "webMarketingRoi": 8.271844,
+          "marketplaceMarketingRoi": 0.681167,
+          "retailMarketingRoi": 6.286331
+        }
+      }
+    },
+    {
+      "id": "negative-margin",
+      "name": "Controlled promotional negative margins",
+      "purpose": "Exercise a full-period aggregate loss separately from occasional promotional row losses.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-03-01",
+          "end": "2025-03-31"
+        },
+        {
+          "start": "2025-06-20",
+          "end": "2025-06-26"
+        }
+      ],
+      "affectedDimensions": {
+        "products": [
+          "PROD-GFT-001",
+          "PROD-OUT-003"
+        ]
+      },
+      "expectedDirectionalResult": "Discovery Gift Bundle is negative in aggregate, while normally profitable Enamel Camp Mug Set has negative rows only during its documented promotion.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000590",
+          "LINE-0000657",
+          "LINE-0000801",
+          "LINE-0000824",
+          "LINE-0004880",
+          "LINE-0004886",
+          "LINE-0004910",
+          "LINE-0004914"
+        ],
+        "observed": {
+          "negativeMarginRowCount": 52,
+          "negativeMarginProductCount": 1,
+          "aggregateNegativeProductIds": "PROD-GFT-001",
+          "aggregateNegativeProductId": "PROD-GFT-001",
+          "aggregateNegativeProductMargin": -0.065341,
+          "promotionalNegativeProductId": "PROD-OUT-003",
+          "promotionalNegativeRowCount": 5,
+          "promotionalNegativeRowsOutsideWindow": 0,
+          "promotionalProductFullPeriodMargin": 0.175397
+        }
+      }
+    },
+    {
+      "id": "high-revenue-low-margin",
+      "name": "High-revenue low-margin cookware",
+      "purpose": "Support percentile-based revenue and weak-margin product rules.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-01-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "products": [
+          "PROD-KIT-001"
+        ]
+      },
+      "expectedDirectionalResult": "Essential Cookware Set ranks in the upper revenue quartile, has no negative rows, and retains a positive aggregate margin below 10%.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000001",
+          "LINE-0000005",
+          "LINE-0000051",
+          "LINE-0000055",
+          "LINE-0000056",
+          "LINE-0000074",
+          "LINE-0000093",
+          "LINE-0000110"
+        ],
+        "observed": {
+          "productRevenue": 179286.8,
+          "productMargin": 0.074812,
+          "negativeMarginRowCount": 0
+        }
+      }
+    },
+    {
+      "id": "concentration-risk",
+      "name": "Hero-product concentration",
+      "purpose": "Exercise product share and top-product concentration calculations.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-01-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "products": [
+          "PROD-HOM-001"
+        ],
+        "categories": [
+          "Home"
+        ]
+      },
+      "expectedDirectionalResult": "Linen Throw Set contributes at least 30% of full-period revenue without dominating every order.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000002",
+          "LINE-0000003",
+          "LINE-0000006",
+          "LINE-0000010",
+          "LINE-0000012",
+          "LINE-0000015",
+          "LINE-0000019",
+          "LINE-0000020"
+        ],
+        "observed": {
+          "heroProductRevenue": 250622.24,
+          "heroProductRevenueShare": 0.322041
+        }
+      }
+    },
+    {
+      "id": "declining-category",
+      "name": "Workspace category decline",
+      "purpose": "Provide a material category decline over comparable six-month windows.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-07-01",
+          "end": "2024-12-31"
+        },
+        {
+          "start": "2025-07-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "categories": [
+          "Workspace"
+        ]
+      },
+      "expectedDirectionalResult": "Workspace revenue declines by at least 20% in H2 2025 versus H2 2024.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0004964",
+          "LINE-0004972",
+          "LINE-0004994",
+          "LINE-0004996",
+          "LINE-0005006",
+          "LINE-0005025",
+          "LINE-0005031",
+          "LINE-0005034"
+        ],
+        "observed": {
+          "workspaceH2RevenueChange": -0.408041
+        }
+      }
+    },
+    {
+      "id": "controlled-anomalies",
+      "name": "Traceable revenue spike and drop",
+      "purpose": "Provide deliberate daily anomalies for future robust-baseline tests.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-11-29",
+          "end": "2024-11-29"
+        },
+        {
+          "start": "2025-08-12",
+          "end": "2025-08-12"
+        }
+      ],
+      "affectedDimensions": {
+        "dates": [
+          "2024-11-29",
+          "2025-08-12"
+        ]
+      },
+      "expectedDirectionalResult": "The November date spikes above its trailing baseline and the August date drops below its trailing baseline.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0002924",
+          "LINE-0002925",
+          "LINE-0002926",
+          "LINE-0002927",
+          "LINE-0005373"
+        ],
+        "observed": {
+          "spikeToTrailingMedianRatio": 4.171522,
+          "dropToTrailingMedianRatio": 0.078234
+        }
+      }
+    },
+    {
+      "id": "marketing-spend-allocation",
+      "name": "Single-line order marketing allocation",
+      "purpose": "Prevent order-level marketing spend from being repeated on every line.",
+      "affectedDateRanges": [
+        {
+          "start": "2024-01-01",
+          "end": "2025-12-31"
+        }
+      ],
+      "affectedDimensions": {
+        "campaigns": [
+          "Marketplace Boost",
+          "Paid Social",
+          "Sponsored Listings"
+        ]
+      },
+      "expectedDirectionalResult": "Each order has at most one positive marketing_spend row; zero-spend Organic Discovery orders remain valid.",
+      "evidence": {
+        "orderLineIds": [
+          "LINE-0000001",
+          "LINE-0000002",
+          "LINE-0000003",
+          "LINE-0000004",
+          "LINE-0000005",
+          "LINE-0000007",
+          "LINE-0000009",
+          "LINE-0000012"
+        ],
+        "observed": {
+          "ordersWithDuplicatedPositiveSpend": 0,
+          "totalMarketingSpend": 73402.21
+        }
+      }
+    }
+  ]
+}

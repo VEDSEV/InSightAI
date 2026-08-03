@@ -1,6 +1,6 @@
 # InsightAI Architecture
 
-**Status:** Phase 1 application-shell baseline
+**Status:** Phase 2 synthetic-data baseline
 **Architecture style:** modular Next.js application with a framework-independent analytics core
 
 ## Goals and constraints
@@ -19,21 +19,23 @@ Key constraints:
 - Windows-compatible local workflow;
 - dependencies added only with an active use case.
 
-## Phase 0–1 technology decisions
+## Phase 0–2 technology decisions
 
-| Area               | Decision                                                   | Reason                                                                                   |
-| ------------------ | ---------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Web framework      | Next.js 16 App Router                                      | Cohesive React application, server/client boundaries, routing, and production build path |
-| Language           | TypeScript with `strict: true`                             | Safer data contracts and refactoring for formula-heavy code                              |
-| Styling            | Tailwind CSS 4 with semantic CSS tokens                    | Fast responsive implementation while retaining a controlled design language              |
-| UI components      | Small owned primitives using CVA, clsx, and tailwind-merge | Keeps variants explicit and accessible without bulk-generated component code             |
-| Charts/icons       | Lucide icons; local SVG/CSS preview visuals                | Establishes a coherent icon language and honest visual hierarchy without adding Recharts |
-| Validation         | Zod planned for ingestion boundary, not installed          | Runtime parsing will be required in Phase 3/5; types alone do not validate uploads       |
-| Testing            | Vitest, Testing Library, user-event, and jsdom             | Covers component semantics and critical mobile behavior without superficial snapshots    |
-| Formatting/linting | Prettier and ESLint flat config                            | Explicit, scriptable quality gates compatible with current Next.js conventions           |
-| Persistence        | Supabase deferred to Phase 9                               | Avoid infrastructure before user/project persistence is required                         |
-| Analytics service  | In-process TypeScript first                                | Lowest operational complexity and shared types; preserve a boundary for later extraction |
-| AI                 | Deferred to Phase 7                                        | Calculations and evidence contracts must be reliable first                               |
+| Area               | Decision                                                     | Reason                                                                                   |
+| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| Web framework      | Next.js 16 App Router                                        | Cohesive React application, server/client boundaries, routing, and production build path |
+| Language           | TypeScript with `strict: true`                               | Safer data contracts and refactoring for formula-heavy code                              |
+| Styling            | Tailwind CSS 4 with semantic CSS tokens                      | Fast responsive implementation while retaining a controlled design language              |
+| UI components      | Small owned primitives using CVA, clsx, and tailwind-merge   | Keeps variants explicit and accessible without bulk-generated component code             |
+| Charts/icons       | Lucide icons; local SVG/CSS preview visuals                  | Establishes a coherent icon language and honest visual hierarchy without adding Recharts |
+| Validation         | Zod planned for ingestion boundary, not installed            | Runtime parsing will be required in Phase 3/5; types alone do not validate uploads       |
+| Testing            | Vitest, Testing Library, user-event, and jsdom               | Covers component semantics and critical mobile behavior without superficial snapshots    |
+| Formatting/linting | Prettier and ESLint flat config                              | Explicit, scriptable quality gates compatible with current Next.js conventions           |
+| Persistence        | Supabase deferred to Phase 9                                 | Avoid infrastructure before user/project persistence is required                         |
+| Analytics service  | In-process TypeScript first                                  | Lowest operational complexity and shared types; preserve a boundary for later extraction |
+| AI                 | Deferred to Phase 7                                          | Calculations and evidence contracts must be reliable first                               |
+| Sample generation  | Native TypeScript executed by Node                           | Keeps the fixture deterministic and dependency-free within the existing toolchain        |
+| Dataset validation | Generator checks plus an independent serialized-CSV verifier | Separates output verification from the generation/control-total implementation           |
 
 The initial shell uses no remote font request so local and CI production builds do not depend on a
 font CDN.
@@ -74,6 +76,8 @@ src/
 └── server/               # Server-only adapters for storage/external services (planned)
 
 data/sample/              # Synthetic data, dictionary, generator, control totals
+scripts/sample-data/      # Config, catalog/customer rules, scenarios, generation, validation
+scripts/*.ts              # Generate/verify entry points; no production analytics
 tests/                    # Contract/integration tests spanning modules
 docs/                     # Durable product and engineering decisions
 public/                   # Static assets only
@@ -97,10 +101,28 @@ The shell uses Server Components by default. The tooltip and mobile navigation a
 because they require focus, keyboard, and disclosure state. Future routes should reuse the shell and
 navigation model rather than duplicate application chrome.
 
+## Phase 2 synthetic-data boundaries
+
+- `data/sample/generator-config.json` owns the fixed seed, versions, period, customer propensities,
+  optional-dimension missingness, and order shape. The generated CSV, checksum, control totals,
+  scenario manifest, and machine/human distribution profiles are reviewable artifacts.
+- `scripts/sample-data/catalog.ts` owns fictional product definitions; `customers.ts` owns opaque
+  customer generation/assignment rules; `scenarios.ts` owns seasonal, regional, channel, discount,
+  margin, concentration, decline, anomaly, and marketing-spend behavior.
+- `generator.ts` creates order shells and reconciled lines using integer cents. `csv.ts` only
+  serializes stable column order. `validation.ts` checks the typed in-memory dataset before output.
+- `scripts/verify-sample-data.ts` deliberately does not import the generator's control calculation.
+  It reparses the CSV and independently reconciles arithmetic, grain, required-field completeness,
+  optional-field missingness, controls, the distribution profile, scenario evidence, customer
+  privacy patterns, marketing allocation, and SHA-256.
+- Phase 2 scripts are development tooling. They do not live in or import `src/analytics`, and the
+  Phase 1 dashboard continues to use only `features/dashboard/preview-data.ts`.
+
 ## Canonical data contract
 
 The initial canonical grain is one order line. An `order_id` may appear on multiple rows, while each
-row describes one product line and its quantity, revenue, cost, and attributable marketing spend.
+row has a unique `order_line_id` and describes one product line, quantity, unit values, explicit
+discount, revenue, cost, optional campaign context, and uniquely allocated marketing spend.
 The required fields and precise constraints are defined in `ANALYTICS_SPEC.md`.
 
 The pipeline must keep three representations distinct:
@@ -200,6 +222,8 @@ rows. Warnings must remain visible downstream.
 - **Unit:** pure formulas, filters, grouping, thresholds, rounding, and edge cases.
 - **Contract:** raw-to-canonical parsing and typed result envelopes.
 - **Golden fixture:** independently calculated control totals for a small readable dataset.
+- **Synthetic dataset:** byte-level reproducibility, serialized-CSV controls, schema/grain/privacy
+  invariants, and directional scenario thresholds for the representative Phase 2 fixture.
 - **Property-oriented:** invariants such as segment revenue summing to total when dimensions are
   exhaustive.
 - **Component:** keyboard behavior, state transitions, accessible names, and data display.
@@ -221,5 +245,5 @@ a network service. Performance optimizations must preserve golden-fixture parity
 
 Material changes should be recorded in this document or a future ADR directory with: context,
 decision, alternatives, consequences, reversal plan, and date. The next decisions expected are the
-canonical runtime schema, dashboard state model, representative dataset ceiling, and upload compute
-location.
+canonical runtime validation schema, Phase 3 decimal representation, dashboard state model,
+representative dataset ceiling, and upload compute location.

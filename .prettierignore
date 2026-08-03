@@ -2,3 +2,11 @@
 coverage
 node_modules
 pnpm-lock.yaml
+
+# Deterministically generated Phase 2 artifacts; regenerate instead of formatting.
+data/sample/control-totals.json
+data/sample/DISTRIBUTION_PROFILE.md
+data/sample/distribution-profile.json
+data/sample/scenario-manifest.json
+data/sample/insightai-orders.csv
+data/sample/insightai-orders.csv.sha256

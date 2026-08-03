@@ -1,0 +1,149 @@
+{
+  "datasetVersion": "insightai-synthetic-orders-v1",
+  "generatorVersion": "1.1.0",
+  "sourceRevision": "phase2-generator-v1.1",
+  "seed": 20260803,
+  "csvSha256": "66f237491182dd1e8ae2c786543e98b3157f27658e7e5c11bfa8cec07de9c5e8",
+  "definitions": {
+    "repeatCustomer": "Customer has at least two distinct order_id values across the full dataset period.",
+    "percentileMethod": "Linear interpolation between adjacent sorted observations at index (n - 1) * p.",
+    "shareBasis": "Full-period net revenue after discounts.",
+    "orderRevenue": "Sum of net revenue across all order lines sharing an order_id."
+  },
+  "orderLinesPerOrder": {
+    "count": 4310,
+    "minimum": 1,
+    "maximum": 4,
+    "mean": 1.603016,
+    "median": 1,
+    "percentiles": {
+      "p25": 1,
+      "p50": 1,
+      "p75": 2,
+      "p90": 3,
+      "p95": 3,
+      "p99": 4
+    }
+  },
+  "quantityPerLine": {
+    "count": 6909,
+    "minimum": 1,
+    "maximum": 3,
+    "mean": 1.309017,
+    "median": 1,
+    "percentiles": {
+      "p25": 1,
+      "p50": 1,
+      "p75": 2,
+      "p90": 2,
+      "p95": 2,
+      "p99": 3
+    },
+    "frequency": {
+      "1": 5118,
+      "2": 1447,
+      "3": 344
+    }
+  },
+  "ordersPerCustomer": {
+    "count": 1200,
+    "minimum": 1,
+    "maximum": 23,
+    "mean": 3.591667,
+    "median": 1,
+    "percentiles": {
+      "p25": 1,
+      "p50": 1,
+      "p75": 5,
+      "p90": 10,
+      "p95": 12,
+      "p99": 15
+    }
+  },
+  "orderRevenue": {
+    "count": 4310,
+    "minimum": 30.6,
+    "maximum": 992,
+    "mean": 180.56406,
+    "median": 147,
+    "percentiles": {
+      "p25": 85.36,
+      "p50": 147,
+      "p75": 235.5,
+      "p90": 360.244,
+      "p95": 434.129,
+      "p99": 652.256
+    }
+  },
+  "discounts": {
+    "rowsWithDiscount": 5031,
+    "rowRate": 0.728181,
+    "totalDiscount": 25222.9
+  },
+  "marketingSpend": {
+    "rowsWithSpend": 3117,
+    "rowRate": 0.451151,
+    "ordersWithSpend": 3117,
+    "orderRate": 0.723202,
+    "totalSpend": 73402.21
+  },
+  "revenueShares": {
+    "product": {
+      "PROD-GFT-001": 0.003311,
+      "PROD-GFT-002": 0.030011,
+      "PROD-HOM-001": 0.322041,
+      "PROD-HOM-002": 0.029548,
+      "PROD-HOM-003": 0.021272,
+      "PROD-KIT-001": 0.230377,
+      "PROD-KIT-002": 0.036271,
+      "PROD-KIT-003": 0.032152,
+      "PROD-OUT-001": 0.039325,
+      "PROD-OUT-002": 0.025021,
+      "PROD-OUT-003": 0.018762,
+      "PROD-WEL-001": 0.06067,
+      "PROD-WEL-002": 0.026436,
+      "PROD-WEL-003": 0.035848,
+      "PROD-WOR-001": 0.043768,
+      "PROD-WOR-002": 0.01806,
+      "PROD-WOR-003": 0.027128
+    },
+    "category": {
+      "Gifting": 0.033322,
+      "Home": 0.372861,
+      "Kitchen": 0.2988,
+      "Outdoor": 0.083108,
+      "Wellness": 0.122954,
+      "Workspace": 0.088956
+    },
+    "region": {
+      "Central": 0.237357,
+      "East": 0.248284,
+      "South": 0.150342,
+      "West": 0.364018
+    },
+    "channel": {
+      "Marketplace": 0.260052,
+      "Retail Pop-up": 0.123555,
+      "Web": 0.616393
+    }
+  },
+  "optionalFieldMissingness": {
+    "customerSegment": {
+      "blankRows": 298,
+      "rowRate": 0.043132,
+      "blankCustomers": 47,
+      "customerRate": 0.039167
+    },
+    "campaign": {
+      "blankRows": 209,
+      "rowRate": 0.03025,
+      "blankOrders": 117,
+      "orderRate": 0.027146
+    }
+  },
+  "customerFrequency": {
+    "oneTimeCustomerCount": 683,
+    "repeatCustomerCount": 517,
+    "repeatCustomerRate": 0.430833
+  }
+}

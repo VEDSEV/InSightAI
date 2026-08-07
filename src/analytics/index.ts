@@ -101,6 +101,13 @@ export type {
   TrendContributionResult,
   TrendFrequency,
 } from "./trends.ts";
+export { analyzePerformanceTrend } from "./performance-trends.ts";
+export type {
+  PerformanceTrendBucket,
+  PerformanceTrendFrequency,
+  PerformanceTrendQuery,
+  PerformanceTrendResult,
+} from "./performance-trends.ts";
 export { normalizeRawOrderLine, normalizeRawOrderLines } from "./normalization.ts";
 export { ORDER_LINE_CSV_COLUMNS, parseOrderLineCsv } from "./parsing.ts";
 export { ingestCanonicalCsv, validateDataset, validateOrderLines } from "./validation.ts";

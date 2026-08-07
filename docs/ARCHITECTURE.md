@@ -87,7 +87,7 @@ src/
 │   ├── layout/           # Application chrome and layout components
 │   └── ui/               # Reusable accessible primitives
 ├── features/
-│   └── dashboard/        # Overview composition, previews, and isolated synthetic UI data
+│   └── dashboard/        # Overview composition, public adapter, filters, charts, and evidence UI
 ├── analytics/            # Pure formulas, grouping, comparison, anomaly, finding rules
 ├── lib/                  # Cross-cutting framework-independent utilities/configuration
 ├── schemas/              # Runtime input schemas and canonical transforms (planned)
@@ -99,22 +99,29 @@ scripts/sample-data/      # Config, catalog/customer rules, scenarios, generatio
 scripts/*.ts              # Generate/verify entry points; no production analytics
 tests/                    # Contract/integration tests spanning modules
 docs/                     # Durable product and engineering decisions
-public/                   # Static assets only
+public/                   # Static assets and the approved browser-fetched synthetic dashboard CSV
 ```
 
 Create planned directories when they have code to own; empty abstractions are not an architecture.
 
-## Phase 1 presentation boundaries
+## Phase 4 dashboard boundaries
 
 - `components/layout` owns the desktop sidebar, focus-contained mobile navigation, skip link, shared
   application shell, and top header.
 - `components/ui` owns reusable variants and state primitives such as buttons, cards, badges, select
   presentations, tooltips, section headers, skeletons, feedback states, and table overflow behavior.
-- `features/dashboard` owns Overview-specific composition, KPI cards, question-led preview visuals,
-  the performance-table preview, and the component state gallery.
-- `features/dashboard/preview-data.ts` is the only source of displayed synthetic business values.
-  It is presentation fixture content, not a dataset and not an analytics input.
-- `analytics` remains unchanged and contains no Phase 1 metrics.
+- `features/dashboard/dashboard-sample-dataset.ts` fetches the approved synthetic CSV and passes it
+  through public `ingestCanonicalCsv`; it owns source metadata and validation configuration, not
+  business totals.
+- `features/dashboard/analytics-adapter.ts` is the only dashboard boundary that turns public engine
+  envelopes into view models. It contains no source-row aggregation or KPI formulas.
+- `features/dashboard/dashboard-filter-state.ts` owns URL-search-state parsing and serialization for
+  date/category/region/channel/product selections. It produces one public `FilterContextInput`.
+- `features/dashboard` presentation components consume adapter values, centralized formatters, and
+  bounded engine evidence. Components do not import analytics internals, Phase 2 generator tooling,
+  or the source dataset.
+- `analytics` remains framework-independent. Its new public performance-trend output provides
+  revenue and gross-profit time buckets; React never derives those series itself.
 
 The shell uses Server Components by default. The tooltip and mobile navigation are client boundaries
 because they require focus, keyboard, and disclosure state. Future routes should reuse the shell and
@@ -134,8 +141,8 @@ navigation model rather than duplicate application chrome.
   It reparses the CSV and independently reconciles arithmetic, grain, required-field completeness,
   optional-field missingness, controls, the distribution profile, scenario evidence, customer
   privacy patterns, marketing allocation, and SHA-256.
-- Phase 2 scripts are development tooling. They do not live in or import `src/analytics`, and the
-  Phase 1 dashboard continues to use only `features/dashboard/preview-data.ts`.
+- Phase 2 scripts are development tooling. They do not live in or import `src/analytics`. Phase 4
+  reads the approved serialized CSV only through its browser data-source adapter and public API.
 
 ## Canonical data contract
 
@@ -202,8 +209,9 @@ preference alone is not a sufficient reason.
   synchronization needs justify it.
 - The selected timezone, inclusive/exclusive date semantics, and comparison mode are part of filter
   context, not hidden globals.
-- Phase 1 filter controls are visibly labeled preview controls and remain disabled. They must not
-  acquire local mock filtering logic that could drift from the Phase 3 analytics engine.
+- Phase 4 filter controls persist compact shareable URL-search state. The adapter validates the
+  resulting dates through the public API and passes the normalized filter to every engine call.
+  Empty selections mean all values, matching the engine contract; no component filters raw rows.
 - Mobile-navigation disclosure state is local UI state. Opening the dialog moves focus inside, traps
   keyboard focus, locks body scroll, supports Escape, and restores focus to the trigger on close.
 

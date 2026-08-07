@@ -118,7 +118,7 @@ export function MobileNavigation() {
             </ul>
           </nav>
           <div className="border-border border-t p-4">
-            <Badge variant="primary">Sample workspace · Demonstration data</Badge>
+            <Badge variant="neutral">Demo data</Badge>
           </div>
         </div>
       </div>

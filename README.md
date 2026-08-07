@@ -4,11 +4,11 @@ InsightAI is an evidence-first business intelligence platform for small e-commer
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phase 2 is approved and merged. Phase 3, the framework-independent
-> deterministic analytics engine, is in progress on `feat/phase-3-analytics-engine`. The engine is
-> not connected to the dashboard: the application still displays the separate Phase 1 preview
-> workspace and contains no production charts, upload workflow, authentication, persistence, AI,
-> forecasting, causal analysis, or deployment integration.
+> **Current status:** Phases 2 and 3 are approved and merged. Phase 4 is in progress on
+> `feat/phase-4-interactive-dashboard`: the Overview uses the public deterministic analytics API
+> with the approved synthetic dataset, interactive filters, charts, and bounded evidence details.
+> Uploads, authentication, persistence, AI, forecasting, causal analysis, report export, and
+> deployment remain out of scope.
 
 ## Product principles
 
@@ -150,8 +150,8 @@ Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-No environment variables are required for the Phase 3 analytics work. Open `http://localhost:3000`
-after the development server starts to inspect the still-isolated Phase 1 preview workspace.
+No environment variables are required for the Phase 4 dashboard. Open `http://localhost:3000` after
+the development server starts to inspect the locally computed interactive workspace.
 
 ### OneDrive development note
 
@@ -185,8 +185,8 @@ remains a separate explicit gate. The full analytics benchmark is intentionally 
 | 0     | Complete    | Product definition, documented contracts, toolchain, and minimal application shell |
 | 1     | Complete    | Accessible dashboard shell and reusable design-system primitives                   |
 | 2     | Complete    | Reproducible synthetic order-line dataset, controls, and scenarios                 |
-| 3     | In progress | Tested deterministic analytics engine                                              |
-| 4     | Planned     | Interactive filters and evidence-linked visualizations                             |
+| 3     | Complete    | Tested deterministic analytics engine, performance revision, and public API        |
+| 4     | In progress | Interactive filters, evidence-linked visualizations, and real engine outputs       |
 | 5     | Planned     | File upload, validation, cleaning, and column mapping                              |
 | 6     | Planned     | Rule-based findings, risks, and opportunities                                      |
 | 7     | Planned     | AI explanations and evidence-based recommendations                                 |
@@ -196,19 +196,26 @@ remains a separate explicit gate. The full analytics benchmark is intentionally 
 
 Detailed entry and exit criteria are in [the roadmap](docs/ROADMAP.md).
 
-## Dataset and UI-preview boundary
+## Dataset and dashboard boundary
 
-All values shown in the Overview page are synthetic UI-preview content centralized in
-`src/features/dashboard/preview-data.ts`. The page repeats “Sample workspace” and “Demonstration data”
-labels at the shell, page, chart, and table levels. Preview modules do not import from or write to
-`src/analytics`, and disabled filters explain which later phase will make them functional.
+The Overview page fetches an intentionally public, byte-identical copy of the approved Phase 2
+synthetic CSV from `public/data/insightai-orders.csv` once per browser session. It validates and
+ingests that source through the supported `src/analytics/index.ts` public API, creates one
+dataset-bound engine, and sends one normalized `FilterContext` to every dashboard request. The
+dashboard adapter in `src/features/dashboard` organizes typed engine envelopes for presentation; it
+does not copy controls, aggregate source rows, or recreate business formulas.
+
+URL search parameters preserve date, category, region, channel, and product selections. Phase 1
+preview values and disabled demo filters have been removed. The evidence drawer exposes the bounded,
+deterministic evidence references returned by the engine rather than raw unbounded source rows.
 
 The generated Phase 2 CSV is documented in [the sample-data guide](data/sample/README.md), with a
 [data dictionary](data/sample/DATA_DICTIONARY.md), [scenario guide](data/sample/SCENARIOS.md),
 [control totals](data/sample/CONTROL_TOTALS.md),
 [distribution profile](data/sample/DISTRIBUTION_PROFILE.md), and
 [provenance statement](data/sample/PROVENANCE.md).
-It is a development fixture for Phase 3 and is not wired into the dashboard.
+It is the initial dashboard source for Phase 4 and remains synthetic, deterministic, and free of real
+customer data.
 
 ## Portfolio relevance
 
@@ -237,10 +244,9 @@ judgment reviewable.
 
 ## Scope guardrails
 
-Phase 3 implements analytics contracts and calculations only. It does not connect results to the
-dashboard or replace Phase 1 preview values. Production charts, functioning dashboard filters,
-uploads, authentication, persistence, external services, generative AI, chat, forecasting, causal
-claims, and deployment remain out of scope. Synthetic source rows, validated canonical rows,
+Phase 4 connects the approved engine to the initial synthetic dashboard only. Uploads,
+authentication, persistence, external services, generative AI, chat, forecasting, causal claims,
+report export, and deployment remain out of scope. Synthetic source rows, validated canonical rows,
 authoritative analytics results, UI presentation, and future AI outputs remain distinct boundaries.
 
 ## License

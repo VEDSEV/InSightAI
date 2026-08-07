@@ -1,7 +1,4 @@
-import { CalendarRange } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
-import { SelectControl } from "@/components/ui/select-control";
 
 export function SiteHeader() {
   return (
@@ -10,19 +7,13 @@ export function SiteHeader() {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className="text-2xl font-semibold tracking-[-0.035em] sm:text-[1.75rem]">
-              Overview
+              Business overview
             </h1>
-            <Badge variant="primary">Sample workspace</Badge>
+            <Badge variant="primary">Commerce performance</Badge>
           </div>
           <p className="text-muted-foreground mt-1.5 max-w-2xl text-sm leading-6">
-            Monitor the signals that will shape weekly commerce decisions.
+            See what is changing across revenue, profit, orders, and customer behavior.
           </p>
-        </div>
-        <div className="border-border bg-surface-subtle flex items-center gap-3 rounded-card border p-2.5 sm:self-start">
-          <span className="bg-surface text-primary hidden size-9 items-center justify-center rounded-button shadow-control sm:flex">
-            <CalendarRange aria-hidden="true" className="size-4" />
-          </span>
-          <SelectControl id="global-date-range" label="Global date range" value="Last 90 days" />
         </div>
       </div>
     </header>

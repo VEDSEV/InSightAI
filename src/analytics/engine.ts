@@ -24,6 +24,11 @@ import {
   type TrendContributionQuery,
   type TrendContributionResult,
 } from "./trends.ts";
+import {
+  analyzePerformanceTrendWithRuntime,
+  type PerformanceTrendQuery,
+  type PerformanceTrendResult,
+} from "./performance-trends.ts";
 import type {
   AnalyticsConfiguration,
   AnalyticsResult,
@@ -47,6 +52,9 @@ export type AnalyticsEngine = {
   readonly trendContributions: (
     query: TrendContributionQuery,
   ) => AnalyticsResult<TrendContributionResult | NonComputableResult>;
+  readonly performanceTrend: (
+    query: PerformanceTrendQuery,
+  ) => AnalyticsResult<PerformanceTrendResult | NonComputableResult>;
   readonly anomalies: (query: AnomalyQuery) => AnalyticsResult<AnomalyResult>;
 };
 
@@ -93,6 +101,8 @@ export function createAnalyticsEngine(
       analyzeMargins(dataset, query, configuration),
     trendContributions: (query: TrendContributionQuery) =>
       analyzeTrendContributions(dataset, query, configuration),
+    performanceTrend: (query: PerformanceTrendQuery) =>
+      analyzePerformanceTrendWithRuntime(runtime, query),
     anomalies: (query: AnomalyQuery) => detectRevenueAnomaliesWithRuntime(runtime, query),
   });
 }

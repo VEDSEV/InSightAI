@@ -547,21 +547,29 @@ The exact protocol, before/after table, 110,544-row results, profile, runtime co
 are in [the benchmark report](ANALYTICS_BENCHMARKS.md). These are workstation-specific local
 microbenchmarks, not universal production-performance guarantees.
 
-## Dashboard separation
+## Dashboard integration boundary
 
-Phase 3 outputs are not imported into the dashboard. The existing application continues to display
-the isolated Phase 1 values in `src/features/dashboard/preview-data.ts`; Phase 2 CSV rows and Phase 3
-results are not wired into presentation code.
+Phase 4 consumes this module only through `src/analytics/index.ts`. The dashboard fetches the
+approved synthetic CSV, validates it with `ingestCanonicalCsv`, creates one immutable
+dataset-bound engine, and uses its typed metric, comparison, breakdown, evidence, and
+`performanceTrend` envelopes. The dashboard adapter may select, label, and format these outputs but
+does not calculate a KPI, share, margin, comparison, or time-series bucket itself.
+
+`performanceTrend` is a public, framework-independent addition for Phase 4. It returns inclusive
+daily, weekly, or monthly buckets with integer-cent revenue and gross profit, row/order support, the
+canonical filter context, and bounded evidence. Empty matched rows return the existing typed
+non-computable result rather than fabricated chart points.
 
 The architecture-boundary test parses repository imports and dashboard expressions to enforce:
 
-- no app/component/dashboard import from analytics, Phase 2 data, or generator tooling;
+- dashboard imports use only the public analytics entry point, never analytics internals, Phase 2
+  data imports, or generator tooling;
 - no React, Next.js, presentation, or generator import inside analytics;
 - code outside analytics may access it only through `src/analytics/index.ts`;
 - dashboard code does not independently reduce or calculate business metrics.
 
-Dashboard integration, production charts, functioning UI filters, and evidence views belong to Phase
-4 after Phase 3 review.
+The architecture check also prevents dashboard arithmetic over business metrics and confirms the
+retired Phase 1 preview implementation is absent.
 
 ## Assumptions and known limitations
 

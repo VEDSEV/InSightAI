@@ -95,7 +95,6 @@
 html {
   background: var(--background);
   color-scheme: light;
-  scroll-behavior: smooth;
 }
 
 body {
@@ -144,10 +143,6 @@ summary {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
   *,
   *::before,
   *::after {

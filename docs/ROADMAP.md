@@ -85,12 +85,12 @@ features already exist.
 
 ## Phase 3 — Deterministic analytics engine
 
-**Status:** In progress on `feat/phase-3-analytics-engine`; dashboard integration remains deferred.
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
 
-The deterministic implementation and performance revision are complete for review. The current
-branch remains intentionally uncommitted until approval. The optimized engine uses bounded
-engine-scoped immutable contexts, passes all four 55,272-row internal performance targets, and has
-also been characterized at 110,544 rows without changing the dashboard boundary.
+The deterministic engine and its performance revision are the authoritative analytics boundary.
+Dashboard integration begins in Phase 4 through the supported public API only. The optimized engine
+uses bounded engine-scoped immutable contexts, passes all four 55,272-row internal performance
+targets, and has also been characterized at 110,544 rows.
 
 **Goal:** implement the analytics specification as framework-independent, tested functions.
 
@@ -111,6 +111,9 @@ also been characterized at 110,544 rows without changing the dashboard boundary.
 - Performance is benchmarked on the Phase 2 dataset and representative larger fixtures.
 
 ## Phase 4 — Interactive filters and visualizations
+
+**Status:** In progress on `feat/phase-4-interactive-dashboard`; Phase 3 is complete, approved,
+committed, merged into `master`, and synchronized with origin. Phase 5 is not in scope.
 
 **Goal:** turn tested analytics outputs into an explorable business view.
 

@@ -1,6 +1,6 @@
 # InsightAI Design System
 
-**Status:** Phase 1 implementation baseline
+**Status:** Phase 4 dashboard implementation baseline
 
 ## Experience principles
 
@@ -139,7 +139,12 @@ explicit Apply action and show unapplied changes.
 
 ## Charts
 
-Recharts is planned for Phase 4. Chart design rules apply regardless of library:
+Phase 4 uses Recharts as the one dashboard charting dependency. The dashboard uses straight-line
+revenue/gross-profit trends and zero-baseline horizontal revenue bars; every chart has a question-led
+title, concise textual summary, keyboard-operable measure controls where present, exact tooltip
+formatting, and a structured data-table alternative.
+
+Chart design rules apply regardless of library:
 
 - Choose the chart from the analytical question, not visual variety.
 - Use line charts for time, bars for categorical comparison, and tables when exact lookup dominates.

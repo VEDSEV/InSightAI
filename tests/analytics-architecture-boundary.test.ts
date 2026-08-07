@@ -336,7 +336,7 @@ function formulaViolations(file: string): readonly string[] {
 }
 
 describe("analytics architecture boundaries", () => {
-  it("keeps the existing application and dashboard disconnected from analytics and Phase 2 tooling", () => {
+  it("keeps dashboard analytics imports on the public entry point and excludes Phase 2 tooling", () => {
     const violations: string[] = [];
     const uiFiles = [APP_ROOT, COMPONENTS_ROOT, DASHBOARD_ROOT].flatMap((root) =>
       collectCodeFiles(root),
@@ -345,8 +345,12 @@ describe("analytics architecture boundaries", () => {
     for (const file of uiFiles) {
       const sourceFile = parseSourceFile(file);
       for (const reference of collectModuleReferences(sourceFile)) {
+        const outsideDashboard = !isWithin(file, DASHBOARD_ROOT);
         const reasons = [
-          referencesAnalytics(file, reference.specifier) ? "analytics" : undefined,
+          referencesAnalytics(file, reference.specifier) &&
+          (outsideDashboard || !referencesPublicAnalyticsEntry(file, reference.specifier))
+            ? "analytics internals or unsupported application analytics"
+            : undefined,
           referencesPhaseTwoData(file, reference.specifier) ? "Phase 2 sample data" : undefined,
           referencesSampleGenerator(file, reference.specifier)
             ? "Phase 2 generator/verifier"
@@ -413,5 +417,14 @@ describe("analytics architecture boundaries", () => {
 
   it("keeps authoritative reducer and metric arithmetic out of dashboard code", () => {
     assertNoViolations(collectCodeFiles(DASHBOARD_ROOT).flatMap(formulaViolations));
+  });
+
+  it("removes the Phase 1 preview-data implementation after dashboard integration", () => {
+    const previewFiles = collectCodeFiles(DASHBOARD_ROOT).filter((file) =>
+      /(?:^|[-/])(?:preview|state-gallery)/u.test(relative(DASHBOARD_ROOT, file)),
+    );
+    assertNoViolations(
+      previewFiles.map((file) => `${relative(REPOSITORY_ROOT, file)} remains in use`),
+    );
   });
 });

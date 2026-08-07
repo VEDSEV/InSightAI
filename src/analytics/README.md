@@ -1,13 +1,13 @@
 # Analytics module
 
-Phase 3's deterministic analytics engine is under active development on
-`feat/phase-3-analytics-engine`. This directory owns authoritative business calculations as small,
-framework-independent TypeScript modules. It must not depend on React, Next.js request objects,
-dashboard state, chart props, databases, AI services, or the Phase 2 generator.
+This directory owns InsightAI's authoritative business calculations as small, framework-independent
+TypeScript modules. It must not depend on React, Next.js request objects, dashboard state, chart
+props, databases, AI services, or the Phase 2 generator.
 
-The engine is not integrated into the dashboard during Phase 3. The Overview page continues to use
-`src/features/dashboard/preview-data.ts`, and presentation code must neither import analytics
-internals nor reimplement business formulas.
+Phase 4 consumes the public entry point through a dedicated dashboard adapter. Presentation code may
+format supported result envelopes but must neither import analytics internals nor reimplement a
+business formula. `performanceTrend` is the public source for the dashboard's revenue/gross-profit
+time series.
 
 ## Supported public API
 

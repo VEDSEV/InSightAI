@@ -33,16 +33,16 @@ export function Sidebar() {
       </nav>
 
       <div className="border-border border-t p-4">
-        <div className="border-border bg-surface-subtle rounded-card border p-3.5">
+        <div className="border-border bg-surface-subtle/60 rounded-card border p-3">
           <div className="flex items-center justify-between gap-2">
-            <span className="flex items-center gap-2 text-xs font-semibold">
-              <DatabaseZap aria-hidden="true" className="text-primary size-4" />
-              Sample workspace
+            <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              <DatabaseZap aria-hidden="true" className="size-3.5" />
+              Demo workspace
             </span>
-            <Badge variant="primary">Demo</Badge>
+            <Badge variant="neutral">Demo data</Badge>
           </div>
           <p className="text-muted-foreground mt-2 text-[0.6875rem] leading-4.5">
-            Synthetic preview values only. No uploaded data is connected.
+            Sample commerce data for exploring the dashboard.
           </p>
         </div>
       </div>

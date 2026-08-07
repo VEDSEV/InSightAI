@@ -67,9 +67,10 @@ snapshots:
   reconcile; shares sum within documented precision; filtering never creates or mutates rows; order
   counts do not exceed line counts; repeat counts do not exceed customer counts; margins agree with
   their rational components; and sorting remains stable.
-- **Dashboard boundary:** static checks prove dashboard components do not import analytics internals,
-  consume Phase 2 data, or independently implement business formulas. Phase 1 preview values remain
-  unchanged through Phase 3.
+- **Dashboard boundary:** the Phase 3 static check proved dashboard components did not import
+  analytics internals, consume Phase 2 data, or independently implement business formulas. Phase 4
+  now permits the public analytics barrel through its adapter while retaining the no-internals and
+  no-formula rules.
 
 ## Benchmarks
 
@@ -85,3 +86,18 @@ limitations live in `docs/ANALYTICS_BENCHMARKS.md`,
 `benchmarks/phase3-analytics-before-optimization.json`,
 `benchmarks/phase3-analytics-profile.json`, and `benchmarks/phase3-analytics.json`. These local
 measurements are not universal production guarantees.
+
+## Phase 4 verification groups
+
+- **Dashboard adapter:** the approved Phase 2 CSV is loaded through the public ingestion API, the
+  dashboard view model reconciles to headline controls, and its KPI, trend, and four visible
+  breakdowns preserve the same normalized filter context.
+- **Filter state and comparisons:** date/category/region/channel/product selections serialize to
+  shareable URL parameters, complete 2025 prior-year comparisons are exposed, and valid no-row
+  selections use typed empty/non-computable states.
+- **Presentation and evidence:** currency/rate/count formatting is tested independently; KPI cards,
+  active controls, reset behavior, evidence disclosure, and bounded identifiers have accessible
+  component coverage.
+- **Boundary and accessibility:** static architecture checks allow dashboard imports only from the
+  public analytics barrel, reject dashboard business arithmetic and Phase 2 tooling imports, confirm
+  preview code was removed, and preserve mobile navigation/reduced-motion checks.

@@ -59,7 +59,7 @@ features already exist.
 
 ## Phase 2 — Realistic order-level sample dataset
 
-**Status:** Complete; realism and coverage revision awaiting review.
+**Status:** Complete, approved, and merged into `master`.
 
 **Goal:** provide a safe, documented dataset with enough variation to exercise real analytical cases.
 
@@ -85,7 +85,12 @@ features already exist.
 
 ## Phase 3 — Deterministic analytics engine
 
-**Status:** Recommended next phase; not started.
+**Status:** In progress on `feat/phase-3-analytics-engine`; dashboard integration remains deferred.
+
+The deterministic implementation and performance revision are complete for review. The current
+branch remains intentionally uncommitted until approval. The optimized engine uses bounded
+engine-scoped immutable contexts, passes all four 55,272-row internal performance targets, and has
+also been characterized at 110,544 rows without changing the dashboard boundary.
 
 **Goal:** implement the analytics specification as framework-independent, tested functions.
 
@@ -93,7 +98,7 @@ features already exist.
 
 - Canonical row types and validation contract.
 - Filters, aggregation helpers, KPI calculations, comparison logic, breakdowns, concentration,
-  segment rules, and anomaly detection.
+  descriptive diagnostic primitives, contribution analysis, and anomaly detection.
 - Typed result envelopes with value, unit, period, filter context, status, and evidence references.
 - Unit and property-oriented edge-case tests.
 
@@ -144,6 +149,10 @@ features already exist.
 ## Phase 6 — Automated findings, risks, and opportunities
 
 **Goal:** prioritize deterministic observations without using generative AI.
+
+Phase 6 consumes the versioned diagnostic and anomaly primitives implemented in Phase 3. It owns
+cross-finding orchestration, deduplication, prioritization, suppression, and user-facing finding
+policy; it does not reimplement the underlying calculations.
 
 **Deliverables**
 

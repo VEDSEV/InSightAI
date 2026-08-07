@@ -1,0 +1,953 @@
+{
+  "benchmarkVersion": "phase3-analytics-benchmark-v2",
+  "generatedAt": "2026-08-07T02:44:31.590Z",
+  "mode": "full",
+  "selectedFixtureScales": [1, 8, 16],
+  "scope": {
+    "coreKpiCount": 19,
+    "breakdownDimensions": [
+      "product",
+      "category",
+      "region",
+      "channel",
+      "customer_segment",
+      "campaign"
+    ],
+    "comparisonModes": [
+      "previous_equal_length",
+      "previous_calendar_month",
+      "previous_calendar_quarter",
+      "previous_year"
+    ],
+    "anomalyFrequencies": ["daily", "weekly"],
+    "fixtureRowCounts": {
+      "phase2-approved": 6909,
+      "phase2-approved-x8": 55272,
+      "phase2-approved-x16": 110544
+    }
+  },
+  "protocol": {
+    "warmupIterations": 2,
+    "measuredIterations": 7,
+    "execution": "serial",
+    "processModel": "single_process",
+    "cacheState": "fresh engine per warm-up and measured analytics batch; bounded immutable contexts may be shared only by calls within that batch",
+    "clock": "node:perf_hooks performance.now()",
+    "median": "middle sample, or arithmetic mean of the two middle samples for an even count",
+    "p95": "nearest-rank (ceil(0.95 * sample count))",
+    "iterationRationale": "Two warm-ups and seven serial measurements bound an otherwise lengthy full-suite run while retaining multiple measured samples.",
+    "timedWork": "Each phase includes the named public analytics calls plus deterministic result-token construction. Analytics phases also include fresh engine construction for that batch.",
+    "excludedWork": [
+      "filesystem I/O",
+      "Phase 2 fixture loading",
+      "x8 and x16 fixture construction and CSV serialization",
+      "untimed comprehensive public-output and evidence digest construction",
+      "environment and source-control metadata collection",
+      "post-timing deterministic blackhole assertions"
+    ],
+    "resultConsumption": {
+      "timed": "The original compact result-token blackholes are retained exactly for before/after comparability.",
+      "untimed": "A SHA-256 digest covers complete public result envelopes and evidence references for every measured analytics query."
+    }
+  },
+  "performanceTargets": {
+    "appliesToFixture": "phase2-approved-x8",
+    "appliesToMode": "full",
+    "comparison": "measured median must be strictly less than the target",
+    "maximumMedianMilliseconds": {
+      "all_core_kpis": 1500,
+      "all_six_breakdowns": 2000,
+      "all_four_comparison_modes": 4000,
+      "daily_and_weekly_anomalies": 1500
+    },
+    "preOptimizationMedianMilliseconds": {
+      "all_core_kpis": 16770.8671,
+      "all_six_breakdowns": 11509.907,
+      "all_four_comparison_modes": 30548.7244,
+      "daily_and_weekly_anomalies": 4400.9679
+    },
+    "baselineGeneratedAt": "2026-08-03T23:01:28.611Z",
+    "baselineDescription": "Original Phase 3 x8 benchmark on this workstation before the performance revision."
+  },
+  "environment": {
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "os": {
+      "type": "Windows_NT",
+      "platform": "win32",
+      "release": "10.0.26200"
+    },
+    "arch": {
+      "process": "x64",
+      "os": "x64"
+    },
+    "cpu": {
+      "model": "AMD Ryzen 7 7840HS w/ Radeon 780M Graphics     ",
+      "logicalCores": 16
+    },
+    "ram": {
+      "totalBytes": 16312553472
+    },
+    "pnpm": {
+      "declared": "pnpm@11.9.0",
+      "declaredVersion": "11.9.0",
+      "runtimeVersion": null
+    }
+  },
+  "package": {
+    "name": "insightai",
+    "version": "0.1.0"
+  },
+  "sourceControl": {
+    "branch": "feat/phase-3-analytics-engine",
+    "commit": "9ac9b36fd335daa1a2cf896fb3e54a5af6c9e53c",
+    "baseCommit": "9ac9b36fd335daa1a2cf896fb3e54a5af6c9e53c"
+  },
+  "datasets": [
+    {
+      "id": "phase2-approved",
+      "source": "Approved Phase 2 deterministic CSV",
+      "scale": 1,
+      "rowCount": 6909,
+      "identifierStrategy": "Approved Phase 2 identifiers are unchanged.",
+      "distributionStrategy": "Approved Phase 2 dates, values, categories, missingness, and customer/order distributions are unchanged.",
+      "cacheMethodology": {
+        "engineLifecycle": "Every warm-up and measured analytics phase iteration creates a fresh engine inside the timed batch.",
+        "withinBatchSharing": "Calls belonging to one KPI, breakdown, comparison, or anomaly batch share that iteration's engine and its bounded immutable analysis contexts.",
+        "crossIterationReuse": false,
+        "finalResultCacheHitsTimed": false,
+        "parsingAndValidation": "Parsing and validation remain independent operations and do not construct an analytics engine."
+      },
+      "phases": [
+        {
+          "phase": "csv_parsing",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 31.2741,
+          "p95Ms": 68.572,
+          "minimumMs": 21.6081,
+          "maximumMs": 68.572,
+          "blackhole": "sha256:495161f61ec3eec38b17d31c273bbbea52de2fe574882f3093638e0fc9acfd57",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 124039168,
+              "heapTotalBytes": 95838208,
+              "heapUsedBytes": 34809512,
+              "externalBytes": 12312737,
+              "arrayBuffersBytes": 1106015
+            },
+            "afterMeasurements": {
+              "rssBytes": 235454464,
+              "heapTotalBytes": 175792128,
+              "heapUsedBytes": 68190048,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 111415296,
+            "heapUsedDeltaBytes": 33380536,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "normalization_row_and_dataset_validation",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 91.7239,
+          "p95Ms": 106.3265,
+          "minimumMs": 72.3361,
+          "maximumMs": 106.3265,
+          "blackhole": "sha256:263a3fa44a072a36056c0e9f261c43dd3f1ebcfefedc358790c6d19419b12fe4",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 235458560,
+              "heapTotalBytes": 175792128,
+              "heapUsedBytes": 68206328,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 269824000,
+              "heapTotalBytes": 207142912,
+              "heapUsedBytes": 135158168,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 34365440,
+            "heapUsedDeltaBytes": 66951840,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_core_kpis",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 71.5314,
+          "p95Ms": 80.4271,
+          "minimumMs": 61.4056,
+          "maximumMs": 80.4271,
+          "blackhole": "sha256:32f599e768a5827c66fde53d8615c856a9239320474cbe0fe20346e6940c68d9",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 270008320,
+              "heapTotalBytes": 207142912,
+              "heapUsedBytes": 135052456,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 268271616,
+              "heapTotalBytes": 207773696,
+              "heapUsedBytes": 87059072,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": -1736704,
+            "heapUsedDeltaBytes": -47993384,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_six_breakdowns",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 112.2034,
+          "p95Ms": 121.2901,
+          "minimumMs": 89.6725,
+          "maximumMs": 121.2901,
+          "blackhole": "sha256:4f8134b8d09d7403a2cf982f30fd46bfacbacb8907a3cdb9f3bea539a94ee34a",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 268271616,
+              "heapTotalBytes": 207773696,
+              "heapUsedBytes": 87062488,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 270028800,
+              "heapTotalBytes": 208203776,
+              "heapUsedBytes": 91391416,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 1757184,
+            "heapUsedDeltaBytes": 4328928,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_four_comparison_modes",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 58.8465,
+          "p95Ms": 64.6163,
+          "minimumMs": 52.3581,
+          "maximumMs": 64.6163,
+          "blackhole": "sha256:c7feb994d4f2af7bf30ebba80cc8560bfb7021880e764d307fc07332e0d0e8bb",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 270028800,
+              "heapTotalBytes": 208203776,
+              "heapUsedBytes": 91394960,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 275849216,
+              "heapTotalBytes": 209715200,
+              "heapUsedBytes": 122363152,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 5820416,
+            "heapUsedDeltaBytes": 30968192,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "daily_and_weekly_anomalies",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 345.7607,
+          "p95Ms": 399.6092,
+          "minimumMs": 329.1426,
+          "maximumMs": 399.6092,
+          "blackhole": "sha256:4a7a8e92293e74f860821c7d273ff418f1ffdb000e1440130d93dc1401a9583d",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 275849216,
+              "heapTotalBytes": 209715200,
+              "heapUsedBytes": 122366000,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 280952832,
+              "heapTotalBytes": 213540864,
+              "heapUsedBytes": 80902024,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 5103616,
+            "heapUsedDeltaBytes": -41463976,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        }
+      ],
+      "performanceTargetSummary": null,
+      "comprehensivePublicOutput": {
+        "algorithm": "SHA-256",
+        "digest": "sha256:31621aff9531314da609ebf9662131ed1db104b74d70f185696e247afd0274ba",
+        "serialization": "JSON.stringify over complete public result envelopes in declared query order",
+        "timed": false,
+        "includesEvidenceReferences": true,
+        "serializedUtf16CodeUnits": 281462,
+        "coverage": {
+          "coreKpis": 19,
+          "breakdownDimensions": [
+            "product",
+            "category",
+            "region",
+            "channel",
+            "customer_segment",
+            "campaign"
+          ],
+          "comparisonModes": [
+            "previous_equal_length",
+            "previous_calendar_month",
+            "previous_calendar_quarter",
+            "previous_year"
+          ],
+          "anomalyFrequencies": ["daily", "weekly"]
+        }
+      },
+      "processMemory": {
+        "beforeConstruction": {
+          "rssBytes": 123117568,
+          "heapTotalBytes": 95838208,
+          "heapUsedBytes": 34750592,
+          "externalBytes": 12312737,
+          "arrayBuffersBytes": 1106015
+        },
+        "afterConstruction": {
+          "rssBytes": 123289600,
+          "heapTotalBytes": 95838208,
+          "heapUsedBytes": 34757216,
+          "externalBytes": 12312737,
+          "arrayBuffersBytes": 1106015
+        },
+        "afterBenchmarkAndDigest": {
+          "rssBytes": 285687808,
+          "heapTotalBytes": 215920640,
+          "heapUsedBytes": 100067200,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "constructionRssDeltaBytes": 172032,
+        "constructionHeapUsedDeltaBytes": 6624,
+        "totalRssDeltaBytes": 162570240,
+        "totalHeapUsedDeltaBytes": 65316608,
+        "interpretation": "Point-in-time process snapshots include the retained fixture and runtime allocations; deltas are not peak-memory measurements and garbage collection is not forced."
+      }
+    },
+    {
+      "id": "phase2-approved-x8",
+      "source": "Approved Phase 2 deterministic CSV replicated 8 times",
+      "scale": 8,
+      "rowCount": 55272,
+      "identifierStrategy": "Each replica suffixes order-line, order, and customer IDs with -B1 through -B8; product IDs intentionally retain shared dimension identity.",
+      "distributionStrategy": "Dates, monetary values, categorical shares, optional-field missingness, and within-replica customer/order distributions are preserved; row volume increases without adding new business behavior or high-cardinality products and dimensions.",
+      "cacheMethodology": {
+        "engineLifecycle": "Every warm-up and measured analytics phase iteration creates a fresh engine inside the timed batch.",
+        "withinBatchSharing": "Calls belonging to one KPI, breakdown, comparison, or anomaly batch share that iteration's engine and its bounded immutable analysis contexts.",
+        "crossIterationReuse": false,
+        "finalResultCacheHitsTimed": false,
+        "parsingAndValidation": "Parsing and validation remain independent operations and do not construct an analytics engine."
+      },
+      "phases": [
+        {
+          "phase": "csv_parsing",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 341.5596,
+          "p95Ms": 385.5404,
+          "minimumMs": 337.0342,
+          "maximumMs": 385.5404,
+          "blackhole": "sha256:cb375bd7a5191c654efe7491b4f87d0ad30409be4d0b6937bfb9cf230435664a",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 336646144,
+              "heapTotalBytes": 265998336,
+              "heapUsedBytes": 154648112,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 780259328,
+              "heapTotalBytes": 437604352,
+              "heapUsedBytes": 321706736,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 443613184,
+            "heapUsedDeltaBytes": 167058624,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "normalization_row_and_dataset_validation",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 911.6034,
+          "p95Ms": 949.0437,
+          "minimumMs": 857.0948,
+          "maximumMs": 949.0437,
+          "blackhole": "sha256:c07a17549cacdd59021e1ed5214a8cfc276b4ea57344d591f7f8c3efbe4cca89",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 780259328,
+              "heapTotalBytes": 437604352,
+              "heapUsedBytes": 321720304,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 792862720,
+              "heapTotalBytes": 345628672,
+              "heapUsedBytes": 242184720,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 12603392,
+            "heapUsedDeltaBytes": -79535584,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_core_kpis",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 667.4686,
+          "p95Ms": 746.4122,
+          "minimumMs": 625.3197,
+          "maximumMs": 746.4122,
+          "blackhole": "sha256:60ec68821441b60226746ede274833ede4ce526900cd5c9f7182ce3e35430189",
+          "targetAssessment": {
+            "maximumMedianMs": 1500,
+            "measuredMedianMs": 667.4686,
+            "passed": true,
+            "baselineMedianMs": 16770.8671,
+            "speedupFactor": 25.1261,
+            "medianReductionPercent": 96.0201,
+            "authoritative": true,
+            "status": "pass"
+          },
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 792862720,
+              "heapTotalBytes": 345628672,
+              "heapUsedBytes": 242189776,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 828100608,
+              "heapTotalBytes": 408145920,
+              "heapUsedBytes": 284061672,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 35237888,
+            "heapUsedDeltaBytes": 41871896,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_six_breakdowns",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1445.7036,
+          "p95Ms": 1509.9448,
+          "minimumMs": 1385.8353,
+          "maximumMs": 1509.9448,
+          "blackhole": "sha256:7e156de34b10d39f569aca18ed3de5fe4dffeeb9f9ac2162d363553d98843c24",
+          "targetAssessment": {
+            "maximumMedianMs": 2000,
+            "measuredMedianMs": 1445.7036,
+            "passed": true,
+            "baselineMedianMs": 11509.907,
+            "speedupFactor": 7.9615,
+            "medianReductionPercent": 87.4395,
+            "authoritative": true,
+            "status": "pass"
+          },
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 828104704,
+              "heapTotalBytes": 408145920,
+              "heapUsedBytes": 284330872,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 867360768,
+              "heapTotalBytes": 328032256,
+              "heapUsedBytes": 202820464,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 39256064,
+            "heapUsedDeltaBytes": -81510408,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_four_comparison_modes",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 556.8967,
+          "p95Ms": 583.5748,
+          "minimumMs": 518.7977,
+          "maximumMs": 583.5748,
+          "blackhole": "sha256:c04a283aeb219c943e1dbc836a645c087d721b7c76a33b1170b5229a8f6bfa34",
+          "targetAssessment": {
+            "maximumMedianMs": 4000,
+            "measuredMedianMs": 556.8967,
+            "passed": true,
+            "baselineMedianMs": 30548.7244,
+            "speedupFactor": 54.8553,
+            "medianReductionPercent": 98.177,
+            "authoritative": true,
+            "status": "pass"
+          },
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 867360768,
+              "heapTotalBytes": 328032256,
+              "heapUsedBytes": 202824936,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 860983296,
+              "heapTotalBytes": 317112320,
+              "heapUsedBytes": 165059160,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": -6377472,
+            "heapUsedDeltaBytes": -37765776,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "daily_and_weekly_anomalies",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 852.2076,
+          "p95Ms": 889.8207,
+          "minimumMs": 766.2501,
+          "maximumMs": 889.8207,
+          "blackhole": "sha256:701a745f21868d5980db1bd4ad4a923897aa4bcb11c3071f42ef23619782c16f",
+          "targetAssessment": {
+            "maximumMedianMs": 1500,
+            "measuredMedianMs": 852.2076,
+            "passed": true,
+            "baselineMedianMs": 4400.9679,
+            "speedupFactor": 5.1642,
+            "medianReductionPercent": 80.6359,
+            "authoritative": true,
+            "status": "pass"
+          },
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 860983296,
+              "heapTotalBytes": 317112320,
+              "heapUsedBytes": 165061512,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 892616704,
+              "heapTotalBytes": 352374784,
+              "heapUsedBytes": 222960424,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": 31633408,
+            "heapUsedDeltaBytes": 57898912,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        }
+      ],
+      "performanceTargetSummary": {
+        "authoritative": true,
+        "status": "pass",
+        "assessedPhaseCount": 4,
+        "passedPhaseCount": 4,
+        "requiredPhaseCount": 4
+      },
+      "comprehensivePublicOutput": {
+        "algorithm": "SHA-256",
+        "digest": "sha256:6d537d8db87c87e7367142b30398a5668a20ec18bea5decae49e14666c5f57cc",
+        "serialization": "JSON.stringify over complete public result envelopes in declared query order",
+        "timed": false,
+        "includesEvidenceReferences": true,
+        "serializedUtf16CodeUnits": 290056,
+        "coverage": {
+          "coreKpis": 19,
+          "breakdownDimensions": [
+            "product",
+            "category",
+            "region",
+            "channel",
+            "customer_segment",
+            "campaign"
+          ],
+          "comparisonModes": [
+            "previous_equal_length",
+            "previous_calendar_month",
+            "previous_calendar_quarter",
+            "previous_year"
+          ],
+          "anomalyFrequencies": ["daily", "weekly"]
+        }
+      },
+      "processMemory": {
+        "beforeConstruction": {
+          "rssBytes": 285687808,
+          "heapTotalBytes": 215920640,
+          "heapUsedBytes": 100081632,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "afterConstruction": {
+          "rssBytes": 336646144,
+          "heapTotalBytes": 265998336,
+          "heapUsedBytes": 154645336,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "afterBenchmarkAndDigest": {
+          "rssBytes": 918917120,
+          "heapTotalBytes": 384364544,
+          "heapUsedBytes": 305581360,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "constructionRssDeltaBytes": 50958336,
+        "constructionHeapUsedDeltaBytes": 54563704,
+        "totalRssDeltaBytes": 633229312,
+        "totalHeapUsedDeltaBytes": 205499728,
+        "interpretation": "Point-in-time process snapshots include the retained fixture and runtime allocations; deltas are not peak-memory measurements and garbage collection is not forced."
+      }
+    },
+    {
+      "id": "phase2-approved-x16",
+      "source": "Approved Phase 2 deterministic CSV replicated 16 times",
+      "scale": 16,
+      "rowCount": 110544,
+      "identifierStrategy": "Each replica suffixes order-line, order, and customer IDs with -B1 through -B16; product IDs intentionally retain shared dimension identity.",
+      "distributionStrategy": "Dates, monetary values, categorical shares, optional-field missingness, and within-replica customer/order distributions are preserved; row volume increases without adding new business behavior or high-cardinality products and dimensions.",
+      "cacheMethodology": {
+        "engineLifecycle": "Every warm-up and measured analytics phase iteration creates a fresh engine inside the timed batch.",
+        "withinBatchSharing": "Calls belonging to one KPI, breakdown, comparison, or anomaly batch share that iteration's engine and its bounded immutable analysis contexts.",
+        "crossIterationReuse": false,
+        "finalResultCacheHitsTimed": false,
+        "parsingAndValidation": "Parsing and validation remain independent operations and do not construct an analytics engine."
+      },
+      "phases": [
+        {
+          "phase": "csv_parsing",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 703.0017,
+          "p95Ms": 844.4109,
+          "minimumMs": 675.3871,
+          "maximumMs": 844.4109,
+          "blackhole": "sha256:5bbe25023ce85210fd62f7257c0c659d68e09e1d947491f6e1616d8f3cce3b9a",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 931749888,
+              "heapTotalBytes": 473870336,
+              "heapUsedBytes": 391919040,
+              "externalBytes": 10133953,
+              "arrayBuffersBytes": 16623
+            },
+            "afterMeasurements": {
+              "rssBytes": 861638656,
+              "heapTotalBytes": 558657536,
+              "heapUsedBytes": 473584008,
+              "externalBytes": 10131323,
+              "arrayBuffersBytes": 16623
+            },
+            "rssDeltaBytes": -70111232,
+            "heapUsedDeltaBytes": 81664968,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "normalization_row_and_dataset_validation",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1771.1592,
+          "p95Ms": 1862.1557,
+          "minimumMs": 1595.4514,
+          "maximumMs": 1862.1557,
+          "blackhole": "sha256:52b82a3c47f8e740a08948d9cad18606e2ad23848c09270ed09cfc36f1622899",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 861646848,
+              "heapTotalBytes": 558657536,
+              "heapUsedBytes": 473594840,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "afterMeasurements": {
+              "rssBytes": 884346880,
+              "heapTotalBytes": 446627840,
+              "heapUsedBytes": 335286560,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "rssDeltaBytes": 22700032,
+            "heapUsedDeltaBytes": -138308280,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_core_kpis",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1469.7803,
+          "p95Ms": 1503.3772,
+          "minimumMs": 1375.7323,
+          "maximumMs": 1503.3772,
+          "blackhole": "sha256:b5e8207276d3341255d67a4620dcd0cf444fa542e5cfe3fa79a36cbd9a75182d",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 884346880,
+              "heapTotalBytes": 446627840,
+              "heapUsedBytes": 335291328,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "afterMeasurements": {
+              "rssBytes": 997453824,
+              "heapTotalBytes": 602382336,
+              "heapUsedBytes": 510531600,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "rssDeltaBytes": 113106944,
+            "heapUsedDeltaBytes": 175240272,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_six_breakdowns",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 3457.229,
+          "p95Ms": 3557.7919,
+          "minimumMs": 3174.8453,
+          "maximumMs": 3557.7919,
+          "blackhole": "sha256:e92380b226b94f3be8924638d0f0646ae25470e1c78aca6a360c1acc9b5032ae",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 997457920,
+              "heapTotalBytes": 602382336,
+              "heapUsedBytes": 510535104,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "afterMeasurements": {
+              "rssBytes": 1328029696,
+              "heapTotalBytes": 730476544,
+              "heapUsedBytes": 591379360,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "rssDeltaBytes": 330571776,
+            "heapUsedDeltaBytes": 80844256,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "all_four_comparison_modes",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1251.7454,
+          "p95Ms": 1277.344,
+          "minimumMs": 1114.3184,
+          "maximumMs": 1277.344,
+          "blackhole": "sha256:2ad562bf92b1fed3a593fd0fde68a441160027e026817f7521b5ab3408dba823",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 1328029696,
+              "heapTotalBytes": 730476544,
+              "heapUsedBytes": 591384072,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "afterMeasurements": {
+              "rssBytes": 988729344,
+              "heapTotalBytes": 417734656,
+              "heapUsedBytes": 260023304,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "rssDeltaBytes": -339300352,
+            "heapUsedDeltaBytes": -331360768,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        },
+        {
+          "phase": "daily_and_weekly_anomalies",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1596.6225,
+          "p95Ms": 1694.8023,
+          "minimumMs": 1523.4402,
+          "maximumMs": 1694.8023,
+          "blackhole": "sha256:394d15444214ca8fb4e2248f633d2293a870f912b874f13ac4fab53363bfc608",
+          "targetAssessment": null,
+          "processMemory": {
+            "beforeWarmup": {
+              "rssBytes": 988729344,
+              "heapTotalBytes": 417734656,
+              "heapUsedBytes": 260028032,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "afterMeasurements": {
+              "rssBytes": 1018957824,
+              "heapTotalBytes": 445575168,
+              "heapUsedBytes": 365204904,
+              "externalBytes": 10139515,
+              "arrayBuffersBytes": 24815
+            },
+            "rssDeltaBytes": 30228480,
+            "heapUsedDeltaBytes": 105176872,
+            "interpretation": "Point-in-time process snapshots around the complete warm-up and measurement loop; deltas are not peak-memory measurements and are affected by garbage collection."
+          }
+        }
+      ],
+      "performanceTargetSummary": null,
+      "comprehensivePublicOutput": {
+        "algorithm": "SHA-256",
+        "digest": "sha256:3c4acd73e551af4dda38ec10f7927152e5a22495854822b0f33a176ddd9425bd",
+        "serialization": "JSON.stringify over complete public result envelopes in declared query order",
+        "timed": false,
+        "includesEvidenceReferences": true,
+        "serializedUtf16CodeUnits": 291771,
+        "coverage": {
+          "coreKpis": 19,
+          "breakdownDimensions": [
+            "product",
+            "category",
+            "region",
+            "channel",
+            "customer_segment",
+            "campaign"
+          ],
+          "comparisonModes": [
+            "previous_equal_length",
+            "previous_calendar_month",
+            "previous_calendar_quarter",
+            "previous_year"
+          ],
+          "anomalyFrequencies": ["daily", "weekly"]
+        }
+      },
+      "processMemory": {
+        "beforeConstruction": {
+          "rssBytes": 918917120,
+          "heapTotalBytes": 384364544,
+          "heapUsedBytes": 305582728,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "afterConstruction": {
+          "rssBytes": 931749888,
+          "heapTotalBytes": 473870336,
+          "heapUsedBytes": 391917280,
+          "externalBytes": 10133953,
+          "arrayBuffersBytes": 16623
+        },
+        "afterBenchmarkAndDigest": {
+          "rssBytes": 1065848832,
+          "heapTotalBytes": 506044416,
+          "heapUsedBytes": 390584464,
+          "externalBytes": 10139515,
+          "arrayBuffersBytes": 24815
+        },
+        "constructionRssDeltaBytes": 12832768,
+        "constructionHeapUsedDeltaBytes": 86334552,
+        "totalRssDeltaBytes": 146931712,
+        "totalHeapUsedDeltaBytes": 85001736,
+        "interpretation": "Point-in-time process snapshots include the retained fixture and runtime allocations; deltas are not peak-memory measurements and garbage collection is not forced."
+      }
+    }
+  ],
+  "processMemory": {
+    "beforeSelectedFixtures": {
+      "rssBytes": 123117568,
+      "heapTotalBytes": 95838208,
+      "heapUsedBytes": 34743728,
+      "externalBytes": 12312697,
+      "arrayBuffersBytes": 1106015
+    },
+    "afterSelectedFixtures": {
+      "rssBytes": 1065848832,
+      "heapTotalBytes": 506044416,
+      "heapUsedBytes": 390586408,
+      "externalBytes": 10139515,
+      "arrayBuffersBytes": 24815
+    },
+    "rssDeltaBytes": 942731264,
+    "heapUsedDeltaBytes": 355842680,
+    "interpretation": "Point-in-time process snapshots are context for this serial run, not peak-memory or leak measurements; garbage collection is not forced."
+  },
+  "limitations": [
+    "Results describe this workstation, Node runtime, process, and run only; they are not universal production-performance claims.",
+    "The suite is a serial, single-process microbenchmark and does not include file I/O, concurrency, network work, or UI rendering.",
+    "JIT compilation, garbage collection, operating-system scheduling, thermal state, and other local load can affect timings.",
+    "The x8 and x16 fixtures preserve Phase 2 dates and distributions while changing unique transaction and customer IDs; they increase row volume, not behavioral or dimension-cardinality complexity.",
+    "The bounded full protocol uses seven measured samples; nearest-rank p95 therefore selects the maximum sample and should be treated as a local tail indicator, not a stable population estimate.",
+    "The four x8 median targets are project acceptance targets for this recorded environment, not external or universal production benchmarks.",
+    "Memory values are point-in-time process snapshots and deltas rather than forced-GC retained-size or peak-resident-set measurements."
+  ],
+  "blackholeGuard": "sha256:6eb6fe91448ce6d2dd4985f6f3a29495859ee119c159f45f7b30a33f30415ab2"
+}

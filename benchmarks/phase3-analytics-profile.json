@@ -1,0 +1,99 @@
+{
+  "profileVersion": "phase3-analytics-profile-v1",
+  "recordedAt": "2026-08-06",
+  "fixture": {
+    "id": "phase2-approved-x8",
+    "rowCount": 55272,
+    "description": "Approved Phase 2 fixture replicated eight times with unique transaction and customer suffixes."
+  },
+  "environment": {
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "os": "Windows_NT 10.0.26200 x64",
+    "cpu": "AMD Ryzen 7 7840HS",
+    "logicalCores": 16
+  },
+  "method": {
+    "kind": "targeted timing and static call-amplification audit",
+    "purpose": "Identify scale-sensitive work before changing implementation.",
+    "limitations": [
+      "Primitive timings are local diagnostic measurements, not acceptance thresholds.",
+      "The raw runtime profile is temporary and is not retained as a repository artifact.",
+      "Call amplification is derived from the pre-optimization source paths and benchmark queries."
+    ]
+  },
+  "primitiveMedianMilliseconds": {
+    "createFilterContext": 25,
+    "applyFilterContext": 12.6,
+    "aggregateRows": 20.7,
+    "allSixRawGroupingPassesCombined": 170,
+    "oneFullDatasetEvidenceReference": 1136,
+    "oneFullCoreMetricSet": 22660
+  },
+  "evidenceReferenceBreakdown": {
+    "sortedIdentifierCount": 55272,
+    "serializedOrderLineIdUtf16CodeUnitsApproximate": 994897,
+    "preOptimizationBigIntFnvMillisecondsRange": [93, 118],
+    "equivalentUint32FnvMilliseconds": 14.7,
+    "equivalenceExampleHash": "6740d511205ed475"
+  },
+  "preOptimizationAmplification": {
+    "allCoreKpis": {
+      "evidenceReferenceCount": 19,
+      "evidenceRowOccurrences": 1050168
+    },
+    "allSixBreakdowns": {
+      "evidenceReferenceCount": 48,
+      "evidenceRowOccurrences": 663264
+    },
+    "allFourComparisonModes": {
+      "evidenceReferenceCount": 156,
+      "evidenceRowOccurrences": 1854400,
+      "perComparison": {
+        "filterContextConstructions": 6,
+        "rowFilteringPasses": 4,
+        "fullMetricSets": 2,
+        "fullDatasetRepeatScans": 2,
+        "evidenceReferences": 39
+      }
+    },
+    "dailyAndWeeklyAnomalies": {
+      "evidenceReferenceCount": 22,
+      "evidenceRowOccurrences": 217744
+    }
+  },
+  "outputEquivalence": {
+    "method": "Compare the pre-optimization and optimized deterministic timed result-token blackholes for every benchmark phase.",
+    "phase2Approved": {
+      "rowCount": 6909,
+      "allMatched": true,
+      "blackholes": {
+        "csv_parsing": "sha256:495161f61ec3eec38b17d31c273bbbea52de2fe574882f3093638e0fc9acfd57",
+        "normalization_row_and_dataset_validation": "sha256:263a3fa44a072a36056c0e9f261c43dd3f1ebcfefedc358790c6d19419b12fe4",
+        "all_core_kpis": "sha256:32f599e768a5827c66fde53d8615c856a9239320474cbe0fe20346e6940c68d9",
+        "all_six_breakdowns": "sha256:4f8134b8d09d7403a2cf982f30fd46bfacbacb8907a3cdb9f3bea539a94ee34a",
+        "all_four_comparison_modes": "sha256:c7feb994d4f2af7bf30ebba80cc8560bfb7021880e764d307fc07332e0d0e8bb",
+        "daily_and_weekly_anomalies": "sha256:4a7a8e92293e74f860821c7d273ff418f1ffdb000e1440130d93dc1401a9583d"
+      }
+    },
+    "phase2ApprovedX8": {
+      "rowCount": 55272,
+      "allMatched": true,
+      "blackholes": {
+        "csv_parsing": "sha256:cb375bd7a5191c654efe7491b4f87d0ad30409be4d0b6937bfb9cf230435664a",
+        "normalization_row_and_dataset_validation": "sha256:c07a17549cacdd59021e1ed5214a8cfc276b4ea57344d591f7f8c3efbe4cca89",
+        "all_core_kpis": "sha256:60ec68821441b60226746ede274833ede4ce526900cd5c9f7182ce3e35430189",
+        "all_six_breakdowns": "sha256:7e156de34b10d39f569aca18ed3de5fe4dffeeb9f9ac2162d363553d98843c24",
+        "all_four_comparison_modes": "sha256:c04a283aeb219c943e1dbc836a645c087d721b7c76a33b1170b5229a8f6bfa34",
+        "daily_and_weekly_anomalies": "sha256:701a745f21868d5980db1bd4ad4a923897aa4bcb11c3071f42ef23619782c16f"
+      }
+    }
+  },
+  "rootCauses": [
+    "Every KPI envelope independently rebuilt, sorted, serialized, and hashed the same complete evidence ID set.",
+    "Every comparison calculated 38 KPI envelopes although only one metric was requested, then filtered both periods again.",
+    "Filter vocabulary and full-history repeat classification were rebuilt for each request.",
+    "Six breakdowns repeated filtering and grouping instead of sharing one prepared partition pass.",
+    "Daily and weekly anomaly calls repeated filtering and date grouping."
+  ]
+}

@@ -20,6 +20,8 @@
     "test:watch": "vitest",
     "generate:sample-data": "node --experimental-strip-types scripts/generate-sample-data.ts",
     "verify:sample-data": "node --experimental-strip-types scripts/verify-sample-data.ts",
+    "reconcile:analytics": "node --experimental-strip-types scripts/reconcile-analytics.ts",
+    "benchmark:analytics": "node --experimental-strip-types scripts/benchmark-analytics.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run format:check"

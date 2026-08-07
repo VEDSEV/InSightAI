@@ -1,6 +1,6 @@
 # InsightAI Architecture
 
-**Status:** Phase 2 synthetic-data baseline
+**Status:** Phase 3 deterministic-analytics implementation
 **Architecture style:** modular Next.js application with a framework-independent analytics core
 
 ## Goals and constraints
@@ -19,23 +19,25 @@ Key constraints:
 - Windows-compatible local workflow;
 - dependencies added only with an active use case.
 
-## Phase 0–2 technology decisions
+## Phase 0–3 technology decisions
 
-| Area               | Decision                                                     | Reason                                                                                   |
-| ------------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Web framework      | Next.js 16 App Router                                        | Cohesive React application, server/client boundaries, routing, and production build path |
-| Language           | TypeScript with `strict: true`                               | Safer data contracts and refactoring for formula-heavy code                              |
-| Styling            | Tailwind CSS 4 with semantic CSS tokens                      | Fast responsive implementation while retaining a controlled design language              |
-| UI components      | Small owned primitives using CVA, clsx, and tailwind-merge   | Keeps variants explicit and accessible without bulk-generated component code             |
-| Charts/icons       | Lucide icons; local SVG/CSS preview visuals                  | Establishes a coherent icon language and honest visual hierarchy without adding Recharts |
-| Validation         | Zod planned for ingestion boundary, not installed            | Runtime parsing will be required in Phase 3/5; types alone do not validate uploads       |
-| Testing            | Vitest, Testing Library, user-event, and jsdom               | Covers component semantics and critical mobile behavior without superficial snapshots    |
-| Formatting/linting | Prettier and ESLint flat config                              | Explicit, scriptable quality gates compatible with current Next.js conventions           |
-| Persistence        | Supabase deferred to Phase 9                                 | Avoid infrastructure before user/project persistence is required                         |
-| Analytics service  | In-process TypeScript first                                  | Lowest operational complexity and shared types; preserve a boundary for later extraction |
-| AI                 | Deferred to Phase 7                                          | Calculations and evidence contracts must be reliable first                               |
-| Sample generation  | Native TypeScript executed by Node                           | Keeps the fixture deterministic and dependency-free within the existing toolchain        |
-| Dataset validation | Generator checks plus an independent serialized-CSV verifier | Separates output verification from the generation/control-total implementation           |
+| Area               | Decision                                                       | Reason                                                                                   |
+| ------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Web framework      | Next.js 16 App Router                                          | Cohesive React application, server/client boundaries, routing, and production build path |
+| Language           | TypeScript with `strict: true`                                 | Safer data contracts and refactoring for formula-heavy code                              |
+| Styling            | Tailwind CSS 4 with semantic CSS tokens                        | Fast responsive implementation while retaining a controlled design language              |
+| UI components      | Small owned primitives using CVA, clsx, and tailwind-merge     | Keeps variants explicit and accessible without bulk-generated component code             |
+| Charts/icons       | Lucide icons; local SVG/CSS preview visuals                    | Establishes a coherent icon language and honest visual hierarchy without adding Recharts |
+| Validation         | Owned runtime validators; no new schema dependency in Phase 3  | Exact-money and cross-row rules still require explicit validation; revisit at ingestion  |
+| Testing            | Vitest, Testing Library, user-event, and jsdom                 | Covers component semantics and critical mobile behavior without superficial snapshots    |
+| Formatting/linting | Prettier and ESLint flat config                                | Explicit, scriptable quality gates compatible with current Next.js conventions           |
+| Persistence        | Supabase deferred to Phase 9                                   | Avoid infrastructure before user/project persistence is required                         |
+| Analytics service  | In-process TypeScript first                                    | Lowest operational complexity and shared types; preserve a boundary for later extraction |
+| AI                 | Deferred to Phase 7                                            | Calculations and evidence contracts must be reliable first                               |
+| Sample generation  | Native TypeScript executed by Node                             | Keeps the fixture deterministic and dependency-free within the existing toolchain        |
+| Dataset validation | Generator checks plus an independent serialized-CSV verifier   | Separates output verification from the generation/control-total implementation           |
+| Analytics money    | Checked integer cents plus exact numerator/denominator rates   | Prevents uncontrolled floating-point monetary totals and premature percentage rounding   |
+| Analytics API      | `src/analytics/index.ts` is the only supported public boundary | Prevents application code from coupling to calculation internals                         |
 
 The initial shell uses no remote font request so local and CI production builds do not depend on a
 font CDN.
@@ -58,6 +60,23 @@ Future persistence:
 
 The UI may request calculations but cannot define them. The AI adapter may explain calculation
 outputs but cannot modify or replace them.
+
+## Phase 3 analytics boundaries
+
+- CSV parsing, normalization, row validation, dataset validation, filtering, and calculations are
+  separate stages. A dataset is accepted all-or-nothing; invalid rows never enter calculations.
+- Raw, normalized, canonical, validated-dataset, and result types are distinct. Canonical money is
+  checked integer cents, while rates and fractional derived money retain exact numerators and
+  denominators until serialization or display.
+- Generic analytics code receives categorical vocabularies, ID policies, timezone, currency, and
+  date coverage as configuration. It does not import the Phase 2 generator, controls, scenario
+  manifest, or known product IDs.
+- Application and dashboard modules may eventually import only the public analytics entry point.
+  During Phase 3 they import neither the engine nor the Phase 2 CSV, and preview values remain
+  isolated. A static boundary test enforces both directions.
+- No decimal or schema library is added for Phase 3: lexical cents parsing, safe-integer guards, and
+  cross-row reconciliation require small owned validators. This decision can be revisited when the
+  Phase 5 upload/mapping surface creates a concrete schema-composition need.
 
 ## Repository boundaries
 
@@ -136,7 +155,9 @@ flow into calculations merely because TypeScript assigns them a type.
 
 ## Analytics API shape
 
-The detailed types will be implemented in Phase 3, but results should follow this conceptual envelope:
+Phase 3 implements a supported public entry point at `src/analytics/index.ts`. Consumers use the
+dataset-bound engine factory or the exported standalone functions and never import analytics
+internals. Results follow a discriminated envelope rather than exposing context-free numbers:
 
 ```ts
 type MetricResult = {
@@ -151,8 +172,9 @@ type MetricResult = {
 };
 ```
 
-This envelope prevents the UI or a future model from receiving a context-free number. Exact types
-will be refined before implementation and validated with contract tests.
+The concrete contract also carries exact numerator/denominator components, comparison context,
+quality state, bounded evidence, assumptions, precision, and engine version. This prevents the UI or
+a future model from receiving a context-free number and is protected by contract and golden tests.
 
 ## Computation placement
 
@@ -240,6 +262,22 @@ Measure before distributing the system. Track parse time, normalization time, ca
 render time, memory, and row count with synthetic fixtures. Prefer pre-indexing repeated dimensions,
 memoizing by immutable filter/dataset version, and moving CPU work off the main thread before adding
 a network service. Performance optimizations must preserve golden-fixture parity.
+
+The Phase 3 performance revision applies this approach inside each immutable dataset-bound engine.
+A private runtime normalizes exact filter keys, pre-indexes dataset vocabulary and repeat status,
+and retains at most eight immutable analysis contexts in an LRU. Each context shares selected rows,
+base totals, bounded-evidence support, all-six-dimension grouping, and daily date indexes on demand.
+Current and prior comparison periods use separate exact contexts in the same runtime.
+
+The cache is neither global nor unbounded, carries a private runtime identity, and stores no
+cross-engine final results. A new engine therefore cannot observe stale state from another dataset
+or configuration. Standalone calls use an ephemeral runtime. Evidence-equivalence, LRU-eviction,
+immutability, and cross-runtime-rejection tests guard this boundary.
+
+The recorded 55,272-row medians meet the internal targets for KPIs, breakdowns, comparisons, and
+anomalies, and a 110,544-row fixture provides descriptive scaling evidence. The protocol and
+limitations are documented in `docs/ANALYTICS_BENCHMARKS.md`; local measurements are not universal
+production service-level claims.
 
 ## Architecture decision process
 

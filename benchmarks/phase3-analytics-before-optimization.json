@@ -1,0 +1,213 @@
+{
+  "benchmarkVersion": "phase3-analytics-benchmark-v1-before-optimization",
+  "artifactRole": "pre_optimization_baseline",
+  "generatedAt": "2026-08-03T23:01:28.611Z",
+  "mode": "full",
+  "sourceControl": {
+    "branch": "feat/phase-3-analytics-engine",
+    "baseCommit": "9ac9b36fd335daa1a2cf896fb3e54a5af6c9e53c"
+  },
+  "protocol": {
+    "warmupIterations": 2,
+    "measuredIterations": 7,
+    "execution": "serial",
+    "processModel": "single_process",
+    "cacheState": "warm_cache_after_per_operation_warmups",
+    "clock": "node:perf_hooks performance.now()",
+    "unit": "milliseconds",
+    "statistics": {
+      "median": "middle sorted sample; arithmetic mean of two middle samples if the count is even",
+      "p95": "nearest-rank using ceil(0.95 * sample count)",
+      "p95WithSevenSamples": "maximum measured sample"
+    },
+    "timedWork": "Each phase includes the named public analytics calls plus deterministic result-token construction.",
+    "excludedWork": [
+      "filesystem I/O",
+      "Phase 2 fixture loading",
+      "x8 fixture construction and CSV serialization",
+      "engine facade construction",
+      "environment and source-control metadata collection",
+      "post-timing deterministic blackhole assertions"
+    ],
+    "thresholds": null
+  },
+  "environment": {
+    "node": "v24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "os": {
+      "type": "Windows_NT",
+      "release": "10.0.26200"
+    },
+    "arch": "x64",
+    "cpu": {
+      "model": "AMD Ryzen 7 7840HS",
+      "logicalCores": 16
+    },
+    "ram": {
+      "totalBytes": 16312553472
+    },
+    "pnpm": {
+      "declaredVersion": "11.9.0"
+    }
+  },
+  "scope": {
+    "coreKpiCount": 19,
+    "breakdownDimensions": [
+      "product",
+      "category",
+      "region",
+      "channel",
+      "customer_segment",
+      "campaign"
+    ],
+    "comparisonModes": [
+      "previous_equal_length",
+      "previous_calendar_month",
+      "previous_calendar_quarter",
+      "previous_year"
+    ],
+    "anomalyFrequencies": ["daily", "weekly"]
+  },
+  "datasets": [
+    {
+      "id": "phase2-approved",
+      "source": "Approved Phase 2 deterministic CSV",
+      "scale": 1,
+      "rowCount": 6909,
+      "identifierStrategy": "Approved Phase 2 identifiers are unchanged.",
+      "distributionStrategy": "Approved Phase 2 dates, values, categories, missingness, and customer/order distributions are unchanged.",
+      "phases": [
+        {
+          "phase": "csv_parsing",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 38.0583,
+          "p95Ms": 42.789
+        },
+        {
+          "phase": "normalization_row_and_dataset_validation",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 68.2876,
+          "p95Ms": 70.0313
+        },
+        {
+          "phase": "all_core_kpis",
+          "operationCount": 19,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 697.4904,
+          "p95Ms": 728.1117
+        },
+        {
+          "phase": "all_six_breakdowns",
+          "operationCount": 6,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 512.0001,
+          "p95Ms": 545.3685
+        },
+        {
+          "phase": "all_four_comparison_modes",
+          "operationCount": 4,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 1317.0946,
+          "p95Ms": 1378.8855
+        },
+        {
+          "phase": "daily_and_weekly_anomalies",
+          "operationCount": 2,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 416.0759,
+          "p95Ms": 453.9199
+        }
+      ]
+    },
+    {
+      "id": "phase2-approved-x8",
+      "source": "Approved Phase 2 deterministic CSV replicated eight times",
+      "scale": 8,
+      "rowCount": 55272,
+      "identifierStrategy": "Each replica suffixes order-line, order, and customer IDs with -B1 through -B8; product IDs intentionally retain shared dimension identity.",
+      "distributionStrategy": "Dates, monetary values, categorical shares, optional-field missingness, and within-replica customer/order distributions are preserved; row volume increases without adding new business behavior or high-cardinality products and dimensions.",
+      "phases": [
+        {
+          "phase": "csv_parsing",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 319.7822,
+          "p95Ms": 357.4213
+        },
+        {
+          "phase": "normalization_row_and_dataset_validation",
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 560.1526,
+          "p95Ms": 621.0505
+        },
+        {
+          "phase": "all_core_kpis",
+          "operationCount": 19,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 16770.8671,
+          "p95Ms": 17125.9124
+        },
+        {
+          "phase": "all_six_breakdowns",
+          "operationCount": 6,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 11509.907,
+          "p95Ms": 11676.281
+        },
+        {
+          "phase": "all_four_comparison_modes",
+          "operationCount": 4,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 30548.7244,
+          "p95Ms": 32114.728
+        },
+        {
+          "phase": "daily_and_weekly_anomalies",
+          "operationCount": 2,
+          "unit": "milliseconds",
+          "warmupIterations": 2,
+          "measuredIterations": 7,
+          "medianMs": 4400.9679,
+          "p95Ms": 4504.7179
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "finding": "Result-envelope and bounded-evidence construction dominates the scaled analytical paths.",
+      "recommendedFollowUp": "Profile and evaluate safe caching in Phase 4 without changing formulas, decimal and rounding rules, evidence semantics, sorting, or deterministic outputs."
+    }
+  ],
+  "limitations": [
+    "Results describe this workstation, Node runtime, process, and run only; they are not universal production-performance claims.",
+    "The suite is a warm-cache, single-process microbenchmark and does not include file I/O, concurrency, network or database work, application startup, or UI rendering.",
+    "JIT compilation, garbage collection, operating-system scheduling, thermal state, power policy, and other local load can affect timings.",
+    "The x8 fixture preserves Phase 2 dates and distributions while changing unique transaction and customer IDs; it increases scale, not behavioral complexity.",
+    "Product and other dimension cardinalities remain limited by the approved Phase 2 fixture, so this run does not characterize genuinely high-cardinality breakdowns.",
+    "The full protocol uses seven measured samples; nearest-rank p95 therefore selects the maximum sample and is a local tail indicator, not a stable population estimate.",
+    "No pass/fail timing thresholds or external performance benchmarks are encoded.",
+    "The operation timings include deterministic result-token construction and should not be summed as an end-to-end request latency."
+  ]
+}

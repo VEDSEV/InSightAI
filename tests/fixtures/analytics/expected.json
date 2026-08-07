@@ -1,0 +1,150 @@
+{
+  "fixtureVersion": "golden-order-lines-v1",
+  "currency": "USD",
+  "timezone": "America/Chicago",
+  "dateRange": {
+    "start": "2024-02-28",
+    "end": "2024-05-01"
+  },
+  "totals": {
+    "orderLineCount": 9,
+    "distinctOrderCount": 8,
+    "multiLineOrderCount": 1,
+    "distinctCustomerCount": 6,
+    "totalQuantity": 12,
+    "totalRevenueCents": 9500,
+    "totalCostCents": 6700,
+    "totalGrossProfitCents": 2800,
+    "grossMargin": {
+      "numeratorCents": 2800,
+      "denominatorCents": 9500
+    },
+    "averageOrderValue": {
+      "numeratorCents": 9500,
+      "denominatorOrders": 8
+    },
+    "totalDiscountCents": 900,
+    "totalMarketingSpendCents": 1100,
+    "marketingContributionCents": 1700,
+    "marketingRoi": {
+      "numeratorCents": 1700,
+      "denominatorCents": 1100
+    }
+  },
+  "customerFrequency": {
+    "oneTimeCustomerCount": 4,
+    "repeatCustomerCount": 2,
+    "repeatCustomerRate": {
+      "numeratorCustomers": 2,
+      "denominatorCustomers": 6
+    }
+  },
+  "optionalMissingness": {
+    "customerSegmentBlankRows": 2,
+    "customerSegmentBlankCustomers": 1,
+    "campaignBlankRows": 2,
+    "campaignBlankOrders": 2
+  },
+  "marginCases": {
+    "negativeMarginRowCount": 3,
+    "productsWithAnyNegativeMarginRowCount": 2,
+    "aggregateNegativeMarginProductCount": 1,
+    "aggregateNegativeMarginProductIds": ["PROD-OUT-901"]
+  },
+  "marketingAllocation": {
+    "rowsWithPositiveSpend": 5,
+    "ordersWithPositiveSpend": 5,
+    "ordersWithMultiplePositiveSpendRows": 0
+  },
+  "revenueByProduct": [
+    {
+      "key": "PROD-HOM-901",
+      "revenueCents": 3700,
+      "costCents": 2400,
+      "grossProfitCents": 1300,
+      "distinctOrderCount": 3,
+      "quantity": 4,
+      "distinctCustomerCount": 2
+    },
+    {
+      "key": "PROD-OUT-901",
+      "revenueCents": 2400,
+      "costCents": 3000,
+      "grossProfitCents": -600,
+      "distinctOrderCount": 2,
+      "quantity": 3,
+      "distinctCustomerCount": 1
+    },
+    {
+      "key": "PROD-WEL-901",
+      "revenueCents": 2000,
+      "costCents": 500,
+      "grossProfitCents": 1500,
+      "distinctOrderCount": 1,
+      "quantity": 1,
+      "distinctCustomerCount": 1
+    },
+    {
+      "key": "PROD-KIT-901",
+      "revenueCents": 1400,
+      "costCents": 800,
+      "grossProfitCents": 600,
+      "distinctOrderCount": 3,
+      "quantity": 4,
+      "distinctCustomerCount": 3
+    }
+  ],
+  "revenueByCategoryCents": {
+    "Home": 3700,
+    "Kitchen": 1400,
+    "Outdoor": 2400,
+    "Wellness": 2000
+  },
+  "revenueByRegionCents": {
+    "Central": 2900,
+    "East": 2400,
+    "South": 0,
+    "West": 4200
+  },
+  "revenueByChannelCents": {
+    "Marketplace": 4400,
+    "Retail Pop-up": 0,
+    "Web": 5100
+  },
+  "productConcentration": {
+    "topOneRevenueShare": {
+      "numeratorCents": 3700,
+      "denominatorCents": 9500
+    },
+    "topThreeRevenueShare": {
+      "numeratorCents": 8100,
+      "denominatorCents": 9500
+    },
+    "topFiveStatus": "insufficient_segments",
+    "hhi": {
+      "numerator": 2541,
+      "denominator": 9025
+    }
+  },
+  "marchSelection": {
+    "period": {
+      "start": "2024-03-01",
+      "end": "2024-03-31"
+    },
+    "orderLineCount": 3,
+    "distinctOrderCount": 3,
+    "distinctCustomerCount": 3,
+    "totalQuantity": 4,
+    "totalRevenueCents": 1700,
+    "totalCostCents": 1600,
+    "totalGrossProfitCents": 100,
+    "totalDiscountCents": 600,
+    "totalMarketingSpendCents": 100,
+    "repeatCustomerCountWithinSelection": 0,
+    "repeatCustomerRateWithinSelection": {
+      "numeratorCustomers": 0,
+      "denominatorCustomers": 3
+    },
+    "fullDatasetRepeatCustomersVisibleInSelection": 1
+  }
+}

@@ -1,6 +1,6 @@
 # InsightAI Deterministic Analytics Specification
 
-**Status:** specification only; implementation begins in Phase 3  
+**Status:** Phase 3 implementation contract; resolved against the approved Phase 2 fixture
 **Purpose:** define authoritative business facts before they appear in UI or AI context
 
 ## Governing rule
@@ -8,6 +8,37 @@
 Every authoritative metric, comparison, breakdown, anomaly, and rule-based finding must be produced
 by deterministic, versioned code from validated canonical data. A language model may later explain
 these outputs but must never calculate, overwrite, repair, or silently infer them.
+
+## Phase 3 resolved definitions
+
+The following decisions resolve earlier specification ambiguity without changing Phase 2 source
+fields, control totals, scenarios, or checksum:
+
+- Authoritative monetary inputs are parsed lexically from decimal strings into integer cents; the
+  primitive parser accepts zero, one, or two fractional digits and zero-pads when needed. Inputs
+  with more than two fractional digits are rejected rather than rounded. The approved Phase 2 CSV
+  serializes exactly two fractional digits. Derived money may be signed, while Phase 2 source money
+  remains non-negative.
+- Money aggregation uses checked safe integers. Rates retain exact integer numerator and denominator
+  values; basis points are a serialization boundary using round-half-away-from-zero. Rounded rates
+  never feed later calculations or sorting.
+- Canonical metric IDs use `gross_profit` and `gross_margin`. The earlier `total_profit` and
+  `profit_margin` wording referred to the same gross-profit-before-marketing concepts and is retired
+  before implementation.
+- A loaded dataset with zero accepted rows is invalid source data and produces a typed
+  non-computable result. A valid non-empty dataset whose filter matches no rows returns zero for
+  additive sums/counts and `not_applicable` for ratios.
+- Repeat behavior has explicit scopes: `*_within_selection` uses distinct visible orders in the
+  selected period/filter context; `*_full_dataset` classifies each customer from all rows in the
+  loaded validated dataset, then counts classified customers represented in the selection. Phase 2
+  controls use the full-dataset definition.
+- Missing optional dimensions use the analytical key `__missing__`. It represents null source
+  context, not an inferred segment, organic campaign, or zero spend.
+- Generic canonical validation uses dataset-supplied categorical vocabularies and opaque ID rules.
+  Phase 2's exact ID formats and dimension values remain fixture-specific reconciliation checks.
+- Calendar-month and calendar-quarter comparisons require a complete aligned current period.
+  Partial aligned periods return a typed non-computable result. Previous-year comparison shifts the
+  inclusive interval back one calendar year, normalizing February 29 to February 28 when necessary.
 
 ## Canonical dataset
 
@@ -70,14 +101,13 @@ explicit, dated exchange-rate policy in a future specification.
 - Match headers through explicit user-approved mapping, not fuzzy guessing that silently commits.
 - Parse dates with an explicit accepted format and reject ambiguous values such as `01/02/03` unless
   the user confirms a locale.
-- Parse decimals without binary floating-point surprises in the eventual implementation. Currency
-  may be stored as integer minor units or a decimal library representation; do not round every row
-  before aggregation.
+- Parse decimal money lexically and store it as checked integer cents. Never derive authoritative
+  cents through binary floating-point multiplication and never round source rows into validity.
 - Reject NaN, infinity, blank required values, impossible dates, non-integer quantities, and values
   outside declared constraints.
 - Preserve blank optional `customer_segment` and `campaign` values as null. Whole-dataset metrics
   retain those rows. Dimension breakdowns may map null to an explicit `Unknown` or `Unattributed`
-  member, but must not silently drop rows or infer a value. Missing campaign context does not change
+  `__missing__` member, but must not silently drop rows or infer a value. Missing campaign context does not change
   `marketing_spend`; missing segment context does not change distinct-order repeat classification.
 - Dimension normalization may merge case/whitespace variants after showing the proposed result.
 - Duplicate detection uses `order_line_id`. A repeated `order_id` alone is not a duplicate because
@@ -102,8 +132,10 @@ All outputs for a view use one immutable filter context:
 
 - reporting period `[start_date, end_date]`, inclusive at calendar-date grain;
 - timezone;
-- zero or more selected products, categories, regions, and sales channels;
-- comparison mode, initially `previous_period`;
+- zero or more selected products, categories, regions, sales channels, customer segments, campaigns,
+  and derived customer types;
+- comparison mode: previous equal-length period, previous calendar month, previous calendar quarter,
+  or previous year;
 - dataset version and currency.
 
 Dimension filters are ANDed across dimensions and ORed within one dimension. For example, region in
@@ -123,10 +155,18 @@ current:  [start_date, end_date]
 previous: [start_date - N days, start_date - 1 day]
 ```
 
-Use the same dimension filters for both periods. Calendar-aligned month/quarter/year comparison may
-be added later as an explicit mode, not substituted silently. If the dataset lacks the full previous
-period, comparisons return `insufficient_data` unless a deliberately selected partial-comparison mode
-is later specified.
+Use the same non-date filters for both periods. Supported definitions are:
+
+- `previous_equal_length`: the immediately preceding `N` calendar days;
+- `previous_calendar_month`: the complete month immediately before a current interval that is one
+  complete calendar month;
+- `previous_calendar_quarter`: the complete quarter immediately before a current interval that is
+  one complete calendar quarter;
+- `previous_year`: the same inclusive calendar interval one year earlier, with February 29 mapped to
+  February 28.
+
+If the dataset lacks complete coverage for the required previous interval, comparisons return
+`insufficient_data`. Partial previous periods are never annualized, prorated, or silently accepted.
 
 ### Growth formula
 
@@ -148,6 +188,15 @@ Using `abs(P)` keeps direction interpretable if future schemas allow negative co
 Let `R` be the filtered canonical rows. Monetary sums retain calculation precision and are rounded
 only for display according to the dataset currency.
 
+Phase 3 public metric IDs are `total_revenue`, `total_cost`, `gross_profit`, `gross_margin`,
+`distinct_orders`, `order_lines`, `total_quantity`, `average_order_value`, `unique_customers`,
+`one_time_customers_within_selection`, `repeat_customers_within_selection`,
+`repeat_customer_rate_within_selection`, `one_time_customers_full_dataset`,
+`repeat_customers_full_dataset`, `repeat_customer_rate_full_dataset`, `total_discounts`,
+`total_marketing_spend`, `marketing_contribution`, and `marketing_roi`. Additive definitions are sums
+or distinct counts at canonical order-line grain. Marketing contribution is revenue minus cost minus
+allocated spend.
+
 ### Total revenue
 
 ```text
@@ -156,23 +205,22 @@ total_revenue = Σ row.revenue for row in R
 
 Unit: dataset currency. Empty filtered set: `0`, with the UI separately showing that no rows match.
 
-### Total profit
+### Gross profit
 
 In the initial product, “profit” means **gross profit before marketing, tax, shipping, overhead, and
 other operating expenses**:
 
 ```text
 row_gross_profit = row.revenue - row.cost
-total_profit = Σ row_gross_profit for row in R
+gross_profit = Σ row_gross_profit for row in R
 ```
 
-UI labels should prefer “Gross profit” even though the metric identifier remains `total_profit` for
-the requested initial set. This is not accounting net profit.
+The canonical metric ID is `gross_profit`. This is not accounting net profit.
 
-### Profit margin
+### Gross margin
 
 ```text
-profit_margin = total_profit / total_revenue
+gross_margin = gross_profit / total_revenue
 ```
 
 Unit: decimal displayed as percentage. If total revenue is zero, return `null` / `not_applicable`.
@@ -205,19 +253,23 @@ unique_customers = count(distinct row.customer_id for row in R)
 
 Blank customer IDs are rejected at validation and never collapsed into one synthetic customer.
 
-### Repeat-customer rate
+### Repeat-customer metrics
 
-First count distinct selected orders per customer. A repeat customer has at least two distinct order
-IDs within the selected period and filter context.
+For within-selection metrics, first count distinct selected orders per customer. A repeat customer
+has at least two distinct order IDs within the selected period and filter context.
 
 ```text
 repeat_customers = count(customer where distinct_selected_orders(customer) >= 2)
 repeat_customer_rate = repeat_customers / unique_customers
 ```
 
-If unique customers is zero, return `null` / `not_applicable`. This is an in-period repeat rate, not a
-historical retention metric. Product filtering can change it by changing which orders are visible;
-the UI must expose that filter context.
+If unique customers is zero, return `null` / `not_applicable`. Product filtering can change this
+result by changing which orders are visible; the result must expose that filter context.
+
+Full-dataset variants classify every customer from all validated rows before applying the selected
+period. They are named `repeat_customers_full_dataset`, `one_time_customers_full_dataset`, and
+`repeat_customer_rate_full_dataset`. They describe loaded-history frequency, not retention outside
+the loaded dataset. Phase 2 reconciliation uses these variants.
 
 ### Revenue growth
 
@@ -226,7 +278,7 @@ then apply the growth formula above.
 
 ### Profit growth
 
-Calculate `total_profit` for the current and full previous period under identical dimension filters,
+Calculate `gross_profit` for the current and full previous period under identical dimension filters,
 then apply the growth formula above.
 
 ### Marketing ROI
@@ -245,6 +297,16 @@ that marketing caused the associated revenue. If spend has been repeated at orde
 allocation is unknown, mark this metric unavailable rather than double count it.
 
 ## Breakdown definitions
+
+Phase 3 supports product, category, region, channel, customer-segment, and campaign breakdowns. Each
+segment exposes revenue, cost, gross profit, gross margin, distinct orders, quantity, and distinct
+customers where meaningful, plus exact revenue/profit share ratios and optional comparison change.
+The `__missing__` key is used consistently for null optional dimensions. Additive money and quantity
+must reconcile to the filtered total. Distinct orders and customers are non-additive when an order or
+customer spans segments and therefore are not required to sum.
+
+Sorting uses the unrounded requested measure, followed by a locale-independent code-point comparison
+of the stable segment key. Comparison breakdowns use the union of current and prior keys.
 
 All breakdowns group filtered rows, calculate the named sum per normalized dimension value, and sort
 descending by the primary value with normalized name ascending as a stable tie-breaker.
@@ -310,7 +372,11 @@ If total revenue is zero, both values are not applicable. Initial rule levels:
 - `watch`: max product share >= 30% or top-five share >= 70%;
 - `high`: max product share >= 50% or top-five share >= 85%.
 
-Concentration is an exposure, not inherently a problem. Findings must use neutral language.
+Phase 3 calculates top-one, top-three, and—when at least five segments exist—top-five revenue share,
+plus the Herfindahl-Hirschman Index from exact segment revenue shares. It supports product, category,
+region, channel, and customer dimensions. Concentration is an exposure, not inherently a problem.
+Any configured descriptive bands are labeled project defaults, not universal industry thresholds,
+and findings use neutral language.
 
 ### Negative-margin products
 
@@ -331,7 +397,7 @@ For products with at least 3 distinct selected orders and positive revenue:
 
 ```text
 revenue_threshold = 75th percentile of eligible product revenue (inclusive method)
-low_margin_threshold = min(10%, overall_profit_margin - 10 percentage points)
+low_margin_threshold = min(10%, overall_gross_margin - 10 percentage points)
 
 qualifies when:
   product_revenue >= revenue_threshold
@@ -356,7 +422,7 @@ current period but material previously is a 100% decline. A segment new from zer
 
 ### Period-over-period comparisons
 
-At minimum, compare total revenue, total profit, profit margin, total orders, average order value,
+At minimum, compare total revenue, gross profit, gross margin, total orders, average order value,
 unique customers, and marketing ROI when each is computable.
 
 Rate metrics use percentage-point difference as the primary change:
@@ -370,11 +436,13 @@ labels must distinguish `%` from percentage points (`pp`).
 
 ### Basic anomaly detection
 
-Anomalies are detected on a complete daily revenue and gross-profit series for the selected context.
-Missing dates within dataset coverage are filled with zero; dates outside coverage are not invented.
-Require at least 14 daily observations.
+Anomalies are detected on a complete daily or weekly revenue series for the selected context. Missing
+buckets within dataset coverage are filled with zero; buckets outside coverage are not invented.
+Daily mode uses prior matching weekdays when sufficient history exists to reduce routine weekday and
+holiday-season false positives; weekly mode uses prior complete weeks. Frequency, lookback, minimum
+history, robust-z threshold, and materiality are configuration recorded in every result.
 
-For value `x_t` in a rolling trailing baseline of up to 28 prior days (minimum 7):
+For value `x_t` in its configured robust trailing baseline:
 
 ```text
 median = median(baseline)
@@ -384,25 +452,31 @@ robust_z = 0.6745 * (x_t - median) / MAD
 
 A point is a candidate when `abs(robust_z) >= 3.5` and its absolute change from the median is at least
 20% of `max(abs(median), materiality_floor)`. If `MAD = 0`, use a deterministic fallback: candidate
-only when the value differs from the median and the same 20% materiality rule is met. The floor starts
-at the greater of 0.5% of period revenue per day or 50 currency units and must be currency-tuned.
+only when the value differs from the median and the same materiality rule is met. The project-default
+floor is 50 currency units and is configurable. It is not scaled from full-period revenue because
+that can suppress legitimate low-day drops in longer selected periods.
 
-Known incomplete current days must be excluded. Calendar/seasonal context is not inferred in the
-basic method, so the result must be labeled “unusual versus recent daily baseline,” never “unexpected”
-or causal. Later seasonal detection requires a new versioned method and sufficient history.
+Known incomplete current buckets must be excluded. The result is labeled “unusual versus robust
+recent baseline,” never “unexpected” or causal. The weekday-matched baseline is a limited seasonal
+guard, not a forecast or full seasonal model.
 
 ## Result contract
 
 Every metric result must carry:
 
 - stable metric ID and analytics-specification version;
-- raw machine value (`number`, decimal representation, or `null`) and unit;
-- status: `ok`, `not_applicable`, `insufficient_data`, or `invalid_input`;
+- a discriminated machine value (money cents, count, integer quantity, rational money, or exact rate
+  numerator and denominator) and unit;
+- status: `ok`, `not_applicable`, `insufficient_data`, `invalid_filter`, or `invalid_source`;
 - current period, comparison period if used, timezone, and currency;
 - normalized active filters;
 - accepted row count and distinct-order support;
 - dataset and transformation version;
 - warnings and assumptions relevant to interpretation.
+
+Non-computable results use a separate discriminated result shape with a stable reason code and no
+placeholder numerical value. Empty source data, invalid filters, zero denominators, insufficient
+history, unavailable dimensions, and invalid source data remain distinct.
 
 Every finding/anomaly additionally carries:
 
@@ -414,13 +488,31 @@ Every finding/anomaly additionally carries:
 
 Formatted strings are presentation outputs. They must not be parsed back into calculations.
 
+## Evidence contract
+
+Evidence is a bounded locator, not a copy of the dataset. It records the dataset and engine versions,
+matching-row and distinct-order counts, affected date buckets and segment keys, numerator and
+denominator summaries, metric dependencies, and a deterministic sorted sample of source line and
+order IDs. Sample caps are configuration values; every reference reports its cap, total matching
+count, and whether it was truncated. Thousands of raw identifiers are never attached to a result.
+
+Marketing spend is uniquely allocated to one source line per Phase 2 order. Whole-dataset, region,
+channel, and campaign totals are valid under that allocation. Product/category-filtered contribution
+and ROI cannot be interpreted as product attribution; those results carry an
+`unsupported_allocation` data-quality warning or a typed non-computable result.
+
+Promotional-loss diagnostics are data-driven and never name Phase 2 product IDs. A candidate is an
+aggregate-profitable product with both positive- and negative-margin rows where discounted negative
+rows would have been non-negative before discount. It is called a confirmed promotional case only
+when configured promotion-window metadata supports that label; otherwise it remains a candidate.
+
 ## Rounding and display
 
-- Keep internal precision through aggregation.
+- Keep integer-cent and rational precision through aggregation.
 - Round currency for display using the currency's standard minor units, but expose full calculation
   precision to tests where the chosen numeric representation permits.
-- Display percentages with one decimal place by default and provide accessible exact detail where
-  decision-relevant.
+- Serialize percentages to integer basis points using round-half-away-from-zero. Display precision is
+  result metadata and presentation code may choose fewer digits without changing the rational value.
 - Use locale-aware formatting in the UI; locale formatting must not affect stored values.
 - Do not transform a small nonzero result into a displayed zero without an indicator such as `<0.1%`.
 - Sorting uses unrounded values.
@@ -456,7 +548,8 @@ Phase 3 must include at least:
 - multiple currencies and exchange rates;
 - customer history outside the selected dataset;
 - marketing spend at campaign/day/channel grain and formal attribution;
-- time-of-day, fiscal calendars, same-weekday comparison, and seasonality;
+- time-of-day, fiscal calendars, holiday calendars, and full seasonality modeling beyond the limited
+  matching-weekday baseline;
 - statistical confidence, forecasts, experiments, and causal inference.
 
 These limitations must be visible where they materially affect interpretation. They may not be filled

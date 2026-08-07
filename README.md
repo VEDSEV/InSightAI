@@ -4,11 +4,11 @@ InsightAI is an evidence-first business intelligence platform for small e-commer
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phase 2 synthetic order-line dataset realism revision complete and awaiting
-> review. The repository now includes a reproducible, documented, independently verified synthetic
-> CSV plus machine-readable and human-readable distribution profiles. The
-> application still displays the separate Phase 1 preview workspace and contains no production
-> analytics, uploaded business data, or AI features.
+> **Current status:** Phase 2 is approved and merged. Phase 3, the framework-independent
+> deterministic analytics engine, is in progress on `feat/phase-3-analytics-engine`. The engine is
+> not connected to the dashboard: the application still displays the separate Phase 1 preview
+> workspace and contains no production charts, upload workflow, authentication, persistence, AI,
+> forecasting, causal analysis, or deployment integration.
 
 ## Product principles
 
@@ -21,23 +21,26 @@ regions, and channels—without requiring the user to build a reporting stack by
 - **Responsible defaults:** data minimization, accessible interaction, honest uncertainty, and clear
   failure states are product requirements.
 
-## Planned architecture
+## Architecture
 
 The web application uses Next.js App Router, React, strict TypeScript, and Tailwind CSS. Phase 1 adds
 small owned UI primitives with controlled variants, Lucide icons, accessible application navigation,
 and behavior-focused component tests. Preview visuals use local SVG/CSS and do not require a charting
-runtime. Recharts remains deferred until real visualization behavior is in scope; Zod will enter with
-dataset validation. Supabase is deferred until authentication and persistence are in scope.
+runtime. Recharts remains deferred until real visualization behavior is in scope. Runtime-validation
+dependencies are added only when they provide current value at the canonical boundary. Supabase is
+deferred until authentication and persistence are in scope.
 
 Phase 2 adds a framework-independent TypeScript generator under `scripts/sample-data`. Configuration,
 catalog/customer rules, scenarios, serialization, generation-time validation, machine controls,
 distribution profiling, and independent CSV verification are separate modules. No dataset code is
 imported into the UI or `src/analytics`.
 
-Analytics is a separate source boundary inside `src/analytics`. Its future pure functions will accept
-canonical validated rows and return typed metric results with context and quality metadata. A
-Python/FastAPI service is an option only if later workloads demonstrate that the TypeScript boundary
-cannot meet measured performance or library requirements.
+Analytics is a separate source boundary inside `src/analytics`. Its pure functions accept canonical
+validated rows and return typed metrics, comparisons, breakdowns, diagnostics, and bounded evidence
+references with context and data-quality metadata. Application code must import the supported public
+surface from `src/analytics/index.ts`; reaching into analytics internals would make future refactoring
+and formula review unsafe. A Python/FastAPI service remains an option only if measured workloads show
+that the TypeScript boundary cannot meet a demonstrated performance or library requirement.
 
 ```text
 Uploaded file (Phase 5)
@@ -49,8 +52,57 @@ Uploaded file (Phase 5)
   -> grounded AI explanation (Phase 7+, never the source of truth)
 ```
 
-See [Architecture](docs/ARCHITECTURE.md), [Analytics specification](docs/ANALYTICS_SPEC.md), and
+See [Architecture](docs/ARCHITECTURE.md), [Analytics specification](docs/ANALYTICS_SPEC.md),
+[engine reference](docs/ANALYTICS_ENGINE.md), [benchmark report](docs/ANALYTICS_BENCHMARKS.md), and
 [AI safety](docs/AI_SAFETY.md) for the full boundaries.
+
+## Phase 3 engine contract
+
+The Phase 3 boundary separates raw CSV parsing, normalization, row validation, dataset-level
+validation, and calculation. Raw values do not enter formulas merely because they have been assigned
+a TypeScript type. Required fields, optional fields, identifiers, civil dates, categorical values,
+quantities, money syntax, arithmetic reconciliation, duplicate line IDs, dataset coverage, currency,
+and timezone assumptions are checked before a dataset becomes calculable. Invalid rows remain
+explicit validation failures rather than disappearing into aggregates.
+
+Authoritative monetary values are parsed from decimal strings into checked safe-integer cents. Sums
+and monetary changes remain integer cents; margins, shares, ROI, and other rates retain safe-integer
+numerator and denominator values. Percentage serialization derives integer basis points with
+half-away-from-zero rounding; currency and percentage rounding occurs only at an explicit
+serialization or presentation boundary. Interpolated statistics that can fall between cents use
+rational values instead of pretending to be transactional money.
+
+One immutable filter context controls every calculation. Optional `customer_segment` and `campaign`
+nulls remain part of whole-dataset metrics and use the explicit `__missing__` key in filtering and
+breakdowns. Repeat behavior has two named scopes: orders visible within the selected period and
+filters, and customer status calculated across the full loaded dataset. A generic “repeat customer”
+result must not conceal which scope was used.
+
+Date filters use inclusive calendar-date boundaries. Previous equal-length comparisons use the same
+non-date filters and the immediately preceding number of calendar days. Previous-calendar-month and
+previous-calendar-quarter modes require a complete aligned current period; a partial or unaligned
+period returns `invalid_filter`. Previous-year boundaries shift by one calendar year and clamp
+February 29 to February 28 when required. Partial periods are never silently expanded or annualized.
+Absolute change, relative percentage change, and percentage-point change remain distinct fields.
+
+Every public result is an envelope rather than a bare number. It identifies the metric or method,
+status, unit, period, filters, assumptions, quality state, engine version, calculation components, and
+an evidence reference. Evidence keeps total matching counts while retaining at most 12
+deterministically ordered sample source IDs by default. Daily and weekly anomaly analysis uses a
+configurable trailing median/MAD baseline plus relative and absolute materiality requirements;
+partial weekly buckets are excluded by default. This local baseline limits cadence artifacts but does
+not model holiday seasonality, so results say “unusual versus the local baseline” and never imply that
+an event was unexpected or causal. Insufficient history is different from a valid run with no
+anomalies.
+
+Phase 3 reconciliation passes all 26 exact checks against the approved Phase 2 CSV and independent
+controls, including its SHA-256 checksum and cents-based dimensional totals. A private,
+engine-scoped runtime shares immutable filtered aggregates, bounded evidence support, grouping, and
+date indexes through an eight-entry LRU; it has no global or cross-dataset cache. The completed
+benchmark measures parsing/validation, KPI, breakdown, comparison, and anomaly work on 6,909,
+55,272, and 110,544 lines. All four 55,272-row internal performance targets pass while fresh engines
+are constructed inside measured batches. Results remain local characterization rather than universal
+performance claims; see the benchmark report for timings, equivalence evidence, and limitations.
 
 ## Repository structure
 
@@ -98,8 +150,8 @@ Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-No environment variables are required in Phase 2. Open `http://localhost:3000` after the development
-server starts.
+No environment variables are required for the Phase 3 analytics work. Open `http://localhost:3000`
+after the development server starts to inspect the still-isolated Phase 1 preview workspace.
 
 ### OneDrive development note
 
@@ -118,26 +170,29 @@ pnpm format:check
 pnpm build
 pnpm generate:sample-data
 pnpm verify:sample-data
+pnpm reconcile:analytics
+pnpm benchmark:analytics
 ```
 
 `pnpm check` runs linting, type checking, tests, and formatting checks together. The production build
-remains a separate explicit gate.
+remains a separate explicit gate. The full analytics benchmark is intentionally long-running; use
+`pnpm benchmark:analytics -- --quick` only as a harness smoke check, not as the recorded benchmark.
 
 ## Delivery roadmap
 
-| Phase | Status   | Outcome                                                                            |
-| ----- | -------- | ---------------------------------------------------------------------------------- |
-| 0     | Complete | Product definition, documented contracts, toolchain, and minimal application shell |
-| 1     | Complete | Accessible dashboard shell and reusable design-system primitives                   |
-| 2     | Complete | Reproducible synthetic order-line dataset, controls, and scenarios                 |
-| 3     | Next     | Tested deterministic analytics engine                                              |
-| 4     | Planned  | Interactive filters and evidence-linked visualizations                             |
-| 5     | Planned  | File upload, validation, cleaning, and column mapping                              |
-| 6     | Planned  | Rule-based findings, risks, and opportunities                                      |
-| 7     | Planned  | AI explanations and evidence-based recommendations                                 |
-| 8     | Planned  | Grounded conversational analysis                                                   |
-| 9     | Planned  | Authentication, saved projects, database, and file storage                         |
-| 10    | Planned  | Report export, full testing, deployment, documentation, and portfolio polish       |
+| Phase | Status      | Outcome                                                                            |
+| ----- | ----------- | ---------------------------------------------------------------------------------- |
+| 0     | Complete    | Product definition, documented contracts, toolchain, and minimal application shell |
+| 1     | Complete    | Accessible dashboard shell and reusable design-system primitives                   |
+| 2     | Complete    | Reproducible synthetic order-line dataset, controls, and scenarios                 |
+| 3     | In progress | Tested deterministic analytics engine                                              |
+| 4     | Planned     | Interactive filters and evidence-linked visualizations                             |
+| 5     | Planned     | File upload, validation, cleaning, and column mapping                              |
+| 6     | Planned     | Rule-based findings, risks, and opportunities                                      |
+| 7     | Planned     | AI explanations and evidence-based recommendations                                 |
+| 8     | Planned     | Grounded conversational analysis                                                   |
+| 9     | Planned     | Authentication, saved projects, database, and file storage                         |
+| 10    | Planned     | Report export, full testing, deployment, documentation, and portfolio polish       |
 
 Detailed entry and exit criteria are in [the roadmap](docs/ROADMAP.md).
 
@@ -182,10 +237,11 @@ judgment reviewable.
 
 ## Scope guardrails
 
-Phase 2 deliberately excludes the deterministic analytics engine, production charts, functioning
-filters, uploaded data, authoritative findings, persistence, authentication, external services, and
-AI. Synthetic source rows, calculated dataset fields, future analytics outputs, and future AI outputs
-remain distinct. No dependencies were added for Phase 2.
+Phase 3 implements analytics contracts and calculations only. It does not connect results to the
+dashboard or replace Phase 1 preview values. Production charts, functioning dashboard filters,
+uploads, authentication, persistence, external services, generative AI, chat, forecasting, causal
+claims, and deployment remain out of scope. Synthetic source rows, validated canonical rows,
+authoritative analytics results, UI presentation, and future AI outputs remain distinct boundaries.
 
 ## License
 

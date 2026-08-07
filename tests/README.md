@@ -19,3 +19,69 @@ scenarios. Profile guardrails cover order shape, quantity, customer frequency, o
 discounts, marketing coverage, normalized dimension shares, and optional-field missingness. Margin
 scenario tests prove the aggregate-loss, promotional-row-loss, and positive low-margin cases remain
 distinct. The generated CSV verifier follows a separate calculation path from the generator.
+
+## Phase 3 verification groups
+
+The Phase 3 suite is being added on `feat/phase-3-analytics-engine`. Its acceptance results are not
+claimed until the complete repository gate runs. Tests are organized by behavior rather than broad
+snapshots:
+
+- **Money and rates:** decimal-string parsing, fractional-cent rejection, negative constraints, safe
+  large accumulation, rational values, half-away-from-zero basis-point rounding, zero denominators,
+  negative margins, ROI boundaries, and repeated aggregation without floating-point drift.
+- **Parsing and validation:** raw CSV structure, normalization, required/optional fields, IDs, civil
+  dates, dimension values, quantity, money syntax, arithmetic reconciliation, duplicate line IDs,
+  dataset date coverage, currency, timezone, and explicit rejection paths.
+- **Golden fixtures:** independently written expectations for multi-line orders, repeat behavior,
+  zero revenue and prior revenue, negative margin, discounts, optional-dimension nulls, single-line
+  marketing allocation, empty data, insufficient history, mixed dimensions, and leap/month
+  boundaries.
+- **Filters and KPIs:** immutable composable filters, one shared filtered row set, missing-value
+  selection, within-selection and full-dataset repeat scope, all core formulas, context-preserving
+  result envelopes, and non-computable variants.
+- **Comparisons:** equal-length boundaries; aligned full calendar month/quarter rules and
+  `invalid_filter` partial behavior; previous-year February 29 clamping; same non-date filters;
+  unequal month lengths; zero prior values; insufficient coverage; and separation of absolute,
+  relative, and percentage-point change.
+- **Breakdowns and concentration:** requested dimensions and measures, explicit missing keys,
+  deterministic tie-breaking, exact reconciliation, revenue/profit shares, top-one/top-three/top-five
+  shares, HHI, and zero-total behavior.
+- **Diagnostics and trends:** negative-row/product/aggregate margins, configurable high-revenue
+  low-margin rules, promotional-loss evidence, period trends, consecutive declines, and segment
+  contributions that reconcile to the total change without causal claims.
+- **Anomalies and evidence:** daily/weekly aggregation, trailing median/MAD baselines, configurable
+  history and threshold, relative/absolute materiality, zero-MAD fallback, default exclusion of
+  partial weekly buckets, known Phase 2 spike/drop detection, the documented holiday-seasonality
+  limitation, insufficient-history versus no-anomaly states, the default 12-ID deterministic sample
+  cap, and total evidence support counts.
+- **Analysis-context lifecycle:** canonical-equivalent filter reuse, immutable/frozen contexts,
+  eight-entry LRU eviction, lazy all-dimension grouping, and rejection of contexts from another
+  runtime even when dataset metadata matches.
+- **Evidence equivalence:** representative legacy fingerprint literals (including Unicode), exact
+  equality between prepared and direct evidence, and equality between engine/runtime and standalone
+  public metric paths.
+- **Phase 2 reconciliation:** exact row, order, customer, quantity, cents-based monetary, repeat, and
+  category/region/channel controls computed through the public engine API rather than copied from
+  fixture reports.
+- **Invariant and mutation checks:** revenue equals cost plus gross profit; exhaustive partitions
+  reconcile; shares sum within documented precision; filtering never creates or mutates rows; order
+  counts do not exceed line counts; repeat counts do not exceed customer counts; margins agree with
+  their rational components; and sorting remains stable.
+- **Dashboard boundary:** static checks prove dashboard components do not import analytics internals,
+  consume Phase 2 data, or independently implement business formulas. Phase 1 preview values remain
+  unchanged through Phase 3.
+
+## Benchmarks
+
+Performance tests measure, separately, parsing/validation, core KPIs, breakdowns, comparisons, and
+anomalies on the 6,909-line Phase 2 CSV and deterministic 55,272- and 110,544-line fixtures. The
+completed full run uses two warm-ups and seven serial measurements. Each analytics measurement
+constructs a fresh engine; only calls within that batch share its bounded contexts.
+
+The benchmark-contract test validates fixture scale, CLI selection, cache methodology, complete
+public-output/evidence digests, preservation of the original baseline artifact, and all four x8
+target assessments. Runtime, hardware, construction rules, exact before/after medians, and
+limitations live in `docs/ANALYTICS_BENCHMARKS.md`,
+`benchmarks/phase3-analytics-before-optimization.json`,
+`benchmarks/phase3-analytics-profile.json`, and `benchmarks/phase3-analytics.json`. These local
+measurements are not universal production guarantees.

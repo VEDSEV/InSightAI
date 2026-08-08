@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { createAnalyticsEngine, type AnalyticsEngine, type ValidatedDataset } from "@/analytics";
+import { createFindingsEngine, type FindingsEngine } from "@/findings";
 
 import {
   createDashboardFilterOptions,
@@ -20,6 +21,8 @@ type DashboardAnalyticsSource =
       readonly status: "source_ready";
       readonly dataset: ValidatedDataset;
       readonly engine: AnalyticsEngine;
+      /** Dataset-bound and short-lived with this source; its cache never crosses datasets. */
+      readonly findingsEngine: FindingsEngine;
       readonly filterOptions: DashboardFilterOptions;
     };
 
@@ -38,6 +41,7 @@ export function useDashboardAnalytics(
       status: "source_ready",
       dataset: suppliedDataset,
       engine,
+      findingsEngine: createFindingsEngine(engine, suppliedDataset),
       filterOptions: createDashboardFilterOptions(suppliedDataset),
     };
   }, [suppliedDataset]);
@@ -60,6 +64,7 @@ export function useDashboardAnalytics(
           status: "source_ready",
           dataset: loaded.dataset,
           engine,
+          findingsEngine: createFindingsEngine(engine, loaded.dataset),
           filterOptions: createDashboardFilterOptions(loaded.dataset),
         });
       })
@@ -84,6 +89,7 @@ export function useDashboardAnalytics(
       activeSource.dataset,
       filters,
       activeSource.filterOptions,
+      activeSource.findingsEngine,
     );
   }, [filters, source, suppliedSource]);
 }

@@ -1,5 +1,9 @@
 # Phase 3 deterministic analytics engine
 
+Phase 6 consumes this public analytics facade through `src/findings/index.ts`; the findings layer
+does not alter metric, comparison, diagnostic, or evidence semantics. See `FINDINGS_ENGINE.md` for
+its rule policy.
+
 **Status:** Phase 3 implementation reference
 **Engine version:** `3.0.0`
 **Analytics specification version:** `3.0.0`

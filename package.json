@@ -23,6 +23,7 @@
     "reconcile:analytics": "node --experimental-strip-types scripts/reconcile-analytics.ts",
     "benchmark:analytics": "node --experimental-strip-types scripts/benchmark-analytics.ts",
     "benchmark:ingestion": "node --experimental-strip-types scripts/benchmark-ingestion.ts",
+    "benchmark:findings": "node --experimental-strip-types scripts/benchmark-findings.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run format:check"

@@ -16,10 +16,13 @@ import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
 import type { DashboardMetric, DashboardViewModel } from "@/features/dashboard/analytics-adapter";
 import type { ValidatedDataset } from "@/analytics";
+import type { Finding } from "@/findings";
 import { DashboardContextPanels } from "@/features/dashboard/dashboard-context-panels";
 import { DashboardFilterBar } from "@/features/dashboard/dashboard-filter-bar";
 import { BreakdownChart, RevenueTrendChart } from "@/features/dashboard/dashboard-charts";
 import { EvidenceDrawer, type EvidenceSelection } from "@/features/dashboard/evidence-drawer";
+import { FindingDetailsDrawer } from "@/features/dashboard/finding-details-drawer";
+import { FindingsPanel } from "@/features/dashboard/findings-panel";
 import { KpiCard } from "@/features/dashboard/kpi-card";
 import { ProductPerformanceTable } from "@/features/dashboard/product-performance-table";
 import { SampleDataBanner } from "@/features/dashboard/sample-data-banner";
@@ -127,6 +130,7 @@ function DashboardContent({
   filters,
   isPending,
   onInspectEvidence,
+  onInspectFinding,
   onReset,
   onUpdateFilters,
   onClearUploaded,
@@ -141,6 +145,7 @@ function DashboardContent({
   readonly filters: DashboardFilterState;
   readonly isPending: boolean;
   readonly onInspectEvidence: (selection: EvidenceSelection) => void;
+  readonly onInspectFinding: (finding: Finding) => void;
   readonly onReset: () => void;
   readonly onUpdateFilters: (update: Partial<DashboardFilterState>) => void;
   readonly onClearUploaded: () => void;
@@ -248,6 +253,8 @@ function DashboardContent({
           </Card>
         )}
 
+        <FindingsPanel findings={viewModel.findings} onInspect={onInspectFinding} />
+
         <section aria-labelledby="breakdown-analysis-title">
           <SectionHeader
             title="Which parts of the business explain the picture?"
@@ -326,22 +333,26 @@ function DashboardWorkspace() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const analytics = useDashboardAnalytics(filters, uploadedDataset?.dataset ?? null);
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
+  const [findingSelection, setFindingSelection] = useState<Finding | null>(null);
 
   const openUpload = useCallback(() => setUploadOpen(true), []);
   const useDemo = useCallback(() => {
     setUploadedDataset(null);
     setEvidenceSelection(null);
+    setFindingSelection(null);
     resetFilters();
   }, [resetFilters]);
   const clearUploaded = useCallback(() => {
     setUploadedDataset(null);
     setEvidenceSelection(null);
+    setFindingSelection(null);
     resetFilters();
   }, [resetFilters]);
   const completeUpload = useCallback(
     (dataset: ValidatedDataset, filename: string) => {
       setUploadedDataset({ dataset, filename });
       setEvidenceSelection(null);
+      setFindingSelection(null);
       replaceFilters({
         preset: "custom",
         start: dataset.metadata.dateRange.start,
@@ -390,6 +401,7 @@ function DashboardWorkspace() {
         isPending={isPending}
         viewModel={analytics.value}
         onInspectEvidence={setEvidenceSelection}
+        onInspectFinding={setFindingSelection}
         onReset={resetFilters}
         onUpdateFilters={updateFilters}
         onOpenUpload={openUpload}
@@ -399,6 +411,7 @@ function DashboardWorkspace() {
         options={analytics.value.filterOptions}
       />
       <EvidenceDrawer selection={evidenceSelection} onClose={() => setEvidenceSelection(null)} />
+      <FindingDetailsDrawer finding={findingSelection} onClose={() => setFindingSelection(null)} />
     </>
   );
 }

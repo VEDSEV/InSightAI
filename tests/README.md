@@ -112,3 +112,8 @@ measurements are not universal production guarantees.
   evaluates HTML, spreadsheet formulas, or uploaded code.
 - **Workspace switching:** the dashboard retains the demo dataset, exposes the upload entry point,
   and resets filters when an uploaded session dataset replaces it.
+
+## Phase 6 verification groups
+
+- **Findings engine:** deterministic rule outputs, bounded evidence, materiality suppression,
+  ranking, filter propagation, scenario detection, and non-causal/non-prescriptive language.

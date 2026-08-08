@@ -133,6 +133,9 @@ Phase 5 is the active implementation scope.
 
 ## Phase 5 — Data upload, validation, cleaning, and column mapping
 
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
+Phase 6 is the active implementation scope.
+
 **Goal:** let a user safely transform a familiar export into the canonical schema.
 
 **Deliverables**
@@ -150,6 +153,8 @@ Phase 5 is the active implementation scope.
 - File handling passes security, privacy, large-file, and malformed-input tests.
 
 ## Phase 6 — Automated findings, risks, and opportunities
+
+**Status:** In progress on `feat/phase-6-deterministic-findings`; not yet committed or merged.
 
 **Goal:** prioritize deterministic observations without using generative AI.
 

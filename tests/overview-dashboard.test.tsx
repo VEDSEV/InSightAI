@@ -122,6 +122,50 @@ const viewModel = {
     status: "not_applicable",
     message: "No rows are available.",
   },
+  findings: {
+    engineVersion: "1.0.0",
+    ruleSetVersion: "findings-rules-v1",
+    filterContext: {
+      period: { start: "2024-01-01", end: "2025-12-31", boundary: "inclusive" },
+    },
+    suppressed: [],
+    findings: [
+      {
+        findingId: "aggregate-negative-margin-product:product:PROD-HOM-001:2024-01-01:2025-12-31",
+        findingType: "aggregate_negative_margin_product",
+        title: "Linen Throw Set has negative aggregate margin",
+        summary: "Linen Throw Set produced negative gross profit in the active selection.",
+        explanation: "The signal uses aggregate product revenue and line-level cost.",
+        category: "margin_issue",
+        severity: "high",
+        priority: 410,
+        status: "current",
+        affectedMetric: "gross_profit",
+        affectedDimension: "product",
+        affectedSegment: "PROD-HOM-001",
+        currentValue: { kind: "money", cents: -8100 },
+        comparisonValue: null,
+        absoluteChange: null,
+        percentageChangeBasisPoints: null,
+        period: { start: "2024-01-01", end: "2025-12-31", boundary: "inclusive" },
+        filterContext: {
+          period: { start: "2024-01-01", end: "2025-12-31", boundary: "inclusive" },
+        },
+        evidence: [evidence],
+        evidenceStrength: "strong",
+        ruleId: "aggregate-negative-margin-product",
+        ruleVersion: "findings-rules-v1",
+        thresholds: { aggregateNegative: true },
+        materiality: {
+          absoluteExposureCents: 8100,
+          affectedRevenueShareBasisPoints: null,
+          supportingOrderCount: 8,
+          persistencePeriods: 0,
+        },
+      },
+    ],
+    generatedInMs: 4,
+  },
   calculatedInMs: 8.4,
 } as unknown as DashboardViewModel;
 
@@ -141,6 +185,7 @@ describe("Overview dashboard", () => {
     expect(screen.getByLabelText("Demo data notice")).toHaveTextContent("No real customer data");
     expect(screen.queryByText(/deterministic analytics engine/i)).not.toBeInTheDocument();
     expect(screen.getByText("$778.2K")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "What deserves attention?" })).toBeInTheDocument();
     expect(screen.getByLabelText("Category")).not.toBeDisabled();
     expect(screen.getByLabelText("Region")).not.toBeDisabled();
     expect(screen.getByLabelText("Channel")).not.toBeDisabled();
@@ -151,6 +196,20 @@ describe("Overview dashboard", () => {
       "Matching lines",
     );
     expect(screen.getByText("LINE-0000001")).toBeInTheDocument();
+  });
+
+  it("keeps deterministic finding details inspectable without recreating a business formula", async () => {
+    const user = userEvent.setup();
+    useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
+    render(<OverviewDashboard />);
+
+    expect(screen.getByText("Linen Throw Set has negative aggregate margin")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Details" }));
+    expect(
+      screen.getByRole("dialog", { name: /Finding details: Linen Throw Set/i }),
+    ).toHaveTextContent("Rule and evidence details");
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog", { name: /Finding details:/i })).not.toBeInTheDocument();
   });
 
   it("keeps global filter controls shareable through the URL and can reset them", async () => {

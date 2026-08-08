@@ -267,6 +267,14 @@ sent over the network or to an AI provider. The session can be cleared or switch
 dataset at any time. A validated upload is handed to the same public Phase 3 engine and Phase 4
 adapter as the demo dataset; it does not use a second analytics path.
 
+## Deterministic findings (Phase 6)
+
+The dashboard's **What deserves attention?** section is sourced from a versioned deterministic
+findings engine, not generative AI. Findings reuse public analytics comparisons, diagnostics, and
+bounded evidence; they expose the rule, thresholds, period, and evidence details. They are
+observational signals, not causal explanations, forecasts, or recommendations. See
+[`docs/FINDINGS_ENGINE.md`](docs/FINDINGS_ENGINE.md) for the rule catalog and ranking policy.
+
 ## License
 
 No license has been selected. All rights are reserved until the repository owner chooses one.

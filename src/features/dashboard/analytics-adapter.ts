@@ -12,6 +12,7 @@ import {
   type PerformanceTrendResult,
   type ValidatedDataset,
 } from "@/analytics";
+import { createFindingsEngine, type FindingsEngine, type FindingsResult } from "@/findings";
 
 import {
   dashboardFilterContext,
@@ -76,6 +77,7 @@ export type DashboardViewModel = {
   readonly secondaryKpis: readonly DashboardMetric[];
   readonly breakdowns: DashboardBreakdowns;
   readonly trend: PerformanceTrendResult | NonComputableResult;
+  readonly findings: FindingsResult;
   readonly calculatedInMs: number;
 };
 
@@ -186,6 +188,7 @@ export function createDashboardViewModel(
   dataset: ValidatedDataset,
   filter: DashboardFilterState,
   filterOptions = createDashboardFilterOptions(dataset),
+  findingsEngine: FindingsEngine = createFindingsEngine(engine, dataset),
 ): DashboardViewModelResult {
   const filterResult = dashboardFilterContext(filter);
   if (filterResult.status === "error")
@@ -194,6 +197,7 @@ export function createDashboardViewModel(
   const startedAt = typeof performance === "undefined" ? 0 : performance.now();
   const context = filterResult.filter;
   const metrics = engine.metrics(context);
+  const findings = findingsEngine.generate({ filter: context, limit: 6 });
   const trendResult = engine.performanceTrend({ filter: context, frequency: "monthly" });
   if (trendResult.status === "error") {
     return { status: "error", message: trendResult.errors.map((error) => error.message).join(" ") };
@@ -244,6 +248,7 @@ export function createDashboardViewModel(
         product: product.value,
       }),
       trend: trendResult.value,
+      findings,
       calculatedInMs,
     }),
   };

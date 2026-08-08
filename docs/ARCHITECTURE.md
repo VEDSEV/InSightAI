@@ -252,6 +252,15 @@ inspectable. They cannot enter analytics unless the user explicitly approves the
 audit and issue records remain visible for the session. Switching datasets clears incompatible
 dashboard filters and replaces the engine-bound dataset rather than combining demo and upload rows.
 
+### Phase 6 findings boundary
+
+`src/findings/index.ts` is the supported public deterministic findings facade. It consumes only a
+dataset-bound Phase 3 public analytics engine and validated metadata, then applies versioned,
+visible rule configuration for materiality, suppression, evidence strength, deduplication, and
+stable ranking. It neither parses raw CSV nor imports dashboard presentation code. The Phase 4
+adapter asks it for a bounded top-six view using the same filter context, and the findings drawer
+reveals the original engine evidence plus rule metadata.
+
 ## Error and quality model
 
 Expected error categories are input validation, unsupported semantics, insufficient data,

@@ -10,6 +10,7 @@ import { describe, it } from "vitest";
 const REPOSITORY_ROOT = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const SOURCE_ROOT = resolve(REPOSITORY_ROOT, "src");
 const ANALYTICS_ROOT = resolve(SOURCE_ROOT, "analytics");
+const FINDINGS_ROOT = resolve(SOURCE_ROOT, "findings");
 const APP_ROOT = resolve(SOURCE_ROOT, "app");
 const COMPONENTS_ROOT = resolve(SOURCE_ROOT, "components");
 const DASHBOARD_ROOT = resolve(SOURCE_ROOT, "features", "dashboard");
@@ -197,6 +198,19 @@ function referencesPublicAnalyticsEntry(importer: string, specifier: string): bo
   return normalizedTarget === normalizedRoot || normalizedTarget === `${normalizedRoot}/index`;
 }
 
+function referencesFindings(importer: string, specifier: string): boolean {
+  return referencesDirectory(importer, specifier, FINDINGS_ROOT);
+}
+
+function referencesPublicFindingsEntry(importer: string, specifier: string): boolean {
+  const target = resolveLocalSpecifier(importer, specifier);
+  if (!target) return false;
+
+  const normalizedTarget = withoutCodeExtension(target);
+  const normalizedRoot = normalizedPath(FINDINGS_ROOT);
+  return normalizedTarget === normalizedRoot || normalizedTarget === `${normalizedRoot}/index`;
+}
+
 function referencesPhaseTwoData(importer: string, specifier: string): boolean {
   return referencesDirectory(importer, specifier, SAMPLE_DATA_ROOT);
 }
@@ -336,7 +350,7 @@ function formulaViolations(file: string): readonly string[] {
 }
 
 describe("analytics architecture boundaries", () => {
-  it("keeps dashboard analytics imports on the public entry point and excludes Phase 2 tooling", () => {
+  it("keeps dashboard analytics and findings imports on public entry points and excludes Phase 2 tooling", () => {
     const violations: string[] = [];
     const uiFiles = [APP_ROOT, COMPONENTS_ROOT, DASHBOARD_ROOT].flatMap((root) =>
       collectCodeFiles(root),
@@ -350,6 +364,10 @@ describe("analytics architecture boundaries", () => {
           referencesAnalytics(file, reference.specifier) &&
           (outsideDashboard || !referencesPublicAnalyticsEntry(file, reference.specifier))
             ? "analytics internals or unsupported application analytics"
+            : undefined,
+          referencesFindings(file, reference.specifier) &&
+          (outsideDashboard || !referencesPublicFindingsEntry(file, reference.specifier))
+            ? "findings internals or unsupported application findings"
             : undefined,
           referencesPhaseTwoData(file, reference.specifier) ? "Phase 2 sample data" : undefined,
           referencesSampleGenerator(file, reference.specifier)
@@ -391,6 +409,29 @@ describe("analytics architecture boundaries", () => {
       }
     }
 
+    assertNoViolations(violations);
+  });
+
+  it("keeps deterministic findings framework-independent and dependent only on public analytics", () => {
+    const violations: string[] = [];
+    for (const file of collectCodeFiles(FINDINGS_ROOT)) {
+      const sourceFile = parseSourceFile(file);
+      for (const reference of collectModuleReferences(sourceFile)) {
+        const importsPresentation = [APP_ROOT, COMPONENTS_ROOT, DASHBOARD_ROOT].some((root) =>
+          referencesDirectory(file, reference.specifier, root),
+        );
+        if (
+          isReactOrNextImport(reference.specifier) ||
+          importsPresentation ||
+          (referencesAnalytics(file, reference.specifier) &&
+            !referencesPublicAnalyticsEntry(file, reference.specifier))
+        ) {
+          violations.push(
+            `${location(sourceFile, reference.node)} imports forbidden presentation or non-public analytics code through "${reference.specifier}"`,
+          );
+        }
+      }
+    }
     assertNoViolations(violations);
   });
 

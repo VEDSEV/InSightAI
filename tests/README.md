@@ -101,3 +101,14 @@ measurements are not universal production guarantees.
 - **Boundary and accessibility:** static architecture checks allow dashboard imports only from the
   public analytics barrel, reject dashboard business arithmetic and Phase 2 tooling imports, confirm
   preview code was removed, and preserve mobile navigation/reduced-motion checks.
+
+## Phase 5 verification groups
+
+- **Ingestion core:** file guards, UTF-8 decoding, CSV syntax and header safety, deterministic
+  aliases, editable mappings, date ambiguity, currency cleanup, leading-zero IDs, optional values,
+  invalid-row disposition, explicit exclusion approval, reconciliation totals, and canonical-engine
+  handoff.
+- **Safety:** formula-like cell text remains inert and visible only as source data; no parsing path
+  evaluates HTML, spreadsheet formulas, or uploaded code.
+- **Workspace switching:** the dashboard retains the demo dataset, exposes the upload entry point,
+  and resets filters when an uploaded session dataset replaces it.

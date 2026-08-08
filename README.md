@@ -186,8 +186,8 @@ remains a separate explicit gate. The full analytics benchmark is intentionally 
 | 1     | Complete    | Accessible dashboard shell and reusable design-system primitives                   |
 | 2     | Complete    | Reproducible synthetic order-line dataset, controls, and scenarios                 |
 | 3     | Complete    | Tested deterministic analytics engine, performance revision, and public API        |
-| 4     | In progress | Interactive filters, evidence-linked visualizations, and real engine outputs       |
-| 5     | Planned     | File upload, validation, cleaning, and column mapping                              |
+| 4     | Complete    | Interactive filters, evidence-linked visualizations, and real engine outputs       |
+| 5     | In progress | Session-only CSV upload, validation, cleaning, and column mapping                  |
 | 6     | Planned     | Rule-based findings, risks, and opportunities                                      |
 | 7     | Planned     | AI explanations and evidence-based recommendations                                 |
 | 8     | Planned     | Grounded conversational analysis                                                   |
@@ -244,10 +244,28 @@ judgment reviewable.
 
 ## Scope guardrails
 
-Phase 4 connects the approved engine to the initial synthetic dashboard only. Uploads,
-authentication, persistence, external services, generative AI, chat, forecasting, causal claims,
-report export, and deployment remain out of scope. Synthetic source rows, validated canonical rows,
+Phase 5 adds CSV ingestion in the current browser session only. Authentication, persistence,
+external storage, generative AI, chat, forecasting, causal claims, report export, and deployment
+remain out of scope. Synthetic source rows, uploaded source rows, validated canonical rows,
 authoritative analytics results, UI presentation, and future AI outputs remain distinct boundaries.
+
+## CSV ingestion (Phase 5)
+
+Use **Upload CSV** from the dashboard workspace to prepare a UTF-8 CSV in the current browser
+session. The workflow is deliberate: choose data, preview, map columns, review quality, configure
+transformations, reconcile, then open the dashboard. It accepts CSV only, up to 8 MB, 50,000 data
+rows, and 100 columns. These are client-side guardrails, not an enterprise-scale claim.
+
+Headers are matched deterministically using normalized names and documented aliases; every mapping
+is editable. Required targets map to the canonical order-line schema. Customer segment, campaign,
+and discount amount are optional; an unmapped optional discount defaults explicitly to zero and is
+recorded in the audit. Dates reject ambiguous numeric forms until the user chooses an interpretation.
+Configured currency symbols and grouping separators can be removed before exact-cent validation.
+
+Uploaded cells are parsed as inert text: formulas and HTML are never evaluated, and raw rows are not
+sent over the network or to an AI provider. The session can be cleared or switched back to the demo
+dataset at any time. A validated upload is handed to the same public Phase 3 engine and Phase 4
+adapter as the demo dataset; it does not use a second analytics path.
 
 ## License
 

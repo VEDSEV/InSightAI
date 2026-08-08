@@ -1,0 +1,3 @@
+Line ID,Order,Order Date,Customer,Segment,SKU,Product,Department,Region,Channel,Qty,Price,Unit COGS,Discount,Net Sales,COGS,Campaign,Ad Spend
+00001,ORD-0001,01/02/2025,0007,,SKU-01,Widget,Home,West,Web,2,$10.00,$6.00,$1.00,$19.00,$12.00,,0
+00002,ORD-0002,01/03/2025,0008,New,SKU-02,Gizmo,Kitchen,East,Web,1,$25.00,$10.00,$0.00,$25.00,$10.00,Launch,3.50

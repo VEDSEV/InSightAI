@@ -182,5 +182,17 @@ export function useDashboardFilters() {
     [updateFilters],
   );
 
-  return Object.freeze({ filters, isPending, updateFilters, choosePreset, resetFilters });
+  const replaceFilters = useCallback(
+    (next: DashboardFilterState) => updateFilters(Object.freeze({ ...next })),
+    [updateFilters],
+  );
+
+  return Object.freeze({
+    filters,
+    isPending,
+    updateFilters,
+    choosePreset,
+    resetFilters,
+    replaceFilters,
+  });
 }

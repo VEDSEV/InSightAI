@@ -112,8 +112,8 @@ targets, and has also been characterized at 110,544 rows.
 
 ## Phase 4 — Interactive filters and visualizations
 
-**Status:** In progress on `feat/phase-4-interactive-dashboard`; Phase 3 is complete, approved,
-committed, merged into `master`, and synchronized with origin. Phase 5 is not in scope.
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
+Phase 5 is the active implementation scope.
 
 **Goal:** turn tested analytics outputs into an explorable business view.
 

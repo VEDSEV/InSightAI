@@ -237,6 +237,21 @@ tested from the perspective of a hostile authenticated user.
 - Apply content-security and secure response headers when third-party integrations are introduced.
 - Document model-provider retention and training settings before any customer data reaches AI.
 
+### Phase 5 ingestion boundary
+
+`src/features/ingestion/ingestion-core.ts` is a framework-independent, client-session preparation
+boundary. It parses generic UTF-8 CSV as inert strings, applies file/shape guardrails, makes only
+deterministic header-alias suggestions, records original-to-canonical field audits, and sends
+accepted candidates through the existing public Phase 3 normalization and validation API. It does
+not calculate dashboard KPIs or loosen canonical validation.
+
+The browser workflow retains a file only long enough to read it and keeps parsed rows, mapping,
+issues, and the validated dataset in React session memory. It creates no object URLs, writes no raw
+rows to logs, makes no network request, and has no persistence or AI integration. Rejected rows are
+inspectable. They cannot enter analytics unless the user explicitly approves their exclusion; their
+audit and issue records remain visible for the session. Switching datasets clears incompatible
+dashboard filters and replaces the engine-bound dataset rather than combining demo and upload rows.
+
 ## Error and quality model
 
 Expected error categories are input validation, unsupported semantics, insufficient data,

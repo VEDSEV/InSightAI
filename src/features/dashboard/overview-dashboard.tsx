@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import {
   CircleDollarSign,
   Gauge,
@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
 import type { DashboardMetric, DashboardViewModel } from "@/features/dashboard/analytics-adapter";
+import type { ValidatedDataset } from "@/analytics";
 import { DashboardContextPanels } from "@/features/dashboard/dashboard-context-panels";
 import { DashboardFilterBar } from "@/features/dashboard/dashboard-filter-bar";
 import { BreakdownChart, RevenueTrendChart } from "@/features/dashboard/dashboard-charts";
@@ -22,6 +23,7 @@ import { EvidenceDrawer, type EvidenceSelection } from "@/features/dashboard/evi
 import { KpiCard } from "@/features/dashboard/kpi-card";
 import { ProductPerformanceTable } from "@/features/dashboard/product-performance-table";
 import { SampleDataBanner } from "@/features/dashboard/sample-data-banner";
+import { UploadWorkflow } from "@/features/ingestion/upload-workflow";
 import { useDashboardAnalytics } from "@/features/dashboard/use-dashboard-analytics";
 import {
   type DashboardDatePreset,
@@ -127,7 +129,11 @@ function DashboardContent({
   onInspectEvidence,
   onReset,
   onUpdateFilters,
+  onClearUploaded,
+  onOpenUpload,
+  onUseDemo,
   options,
+  uploadedFilename,
   viewModel,
 }: {
   readonly activeFilterChips: readonly string[];
@@ -137,7 +143,11 @@ function DashboardContent({
   readonly onInspectEvidence: (selection: EvidenceSelection) => void;
   readonly onReset: () => void;
   readonly onUpdateFilters: (update: Partial<DashboardFilterState>) => void;
+  readonly onClearUploaded: () => void;
+  readonly onOpenUpload: () => void;
+  readonly onUseDemo: () => void;
   readonly options: DashboardFilterOptions;
+  readonly uploadedFilename: string | null;
   readonly viewModel: DashboardViewModel;
 }) {
   return (
@@ -147,10 +157,42 @@ function DashboardContent({
         className="mx-auto max-w-[100rem] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7"
         data-dashboard-calculation-ms={viewModel.calculatedInMs}
       >
+        <section
+          aria-label="Dataset workspace"
+          className="border-border bg-surface-subtle/60 flex flex-col gap-3 rounded-card border p-4 sm:flex-row sm:items-center sm:justify-between"
+        >
+          <div>
+            <p className="text-foreground text-sm font-semibold">
+              {uploadedFilename ? "Uploaded dataset workspace" : "Demo dataset workspace"}
+            </p>
+            <p className="text-muted-foreground mt-1 text-xs">
+              {uploadedFilename
+                ? `${uploadedFilename} is available only in this browser session.`
+                : "Try the synthetic demo or bring your own CSV."}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="secondary" onClick={onOpenUpload}>
+              Upload CSV
+            </Button>
+            {uploadedFilename ? (
+              <>
+                <Button variant="ghost" onClick={onUseDemo}>
+                  Use demo dataset
+                </Button>
+                <Button variant="ghost" onClick={onClearUploaded}>
+                  Clear session data
+                </Button>
+              </>
+            ) : null}
+          </div>
+        </section>
         <SampleDataBanner
           datasetVersion={viewModel.datasetVersion}
           rowCount={viewModel.rowCount}
           timezone={viewModel.timezone}
+          source={uploadedFilename ? "uploaded" : "demo"}
+          filename={uploadedFilename}
         />
 
         <DashboardFilterBar
@@ -260,8 +302,14 @@ function DashboardContent({
         </section>
 
         <footer className="border-border text-muted-foreground flex flex-col gap-2 border-t pt-5 text-xs sm:flex-row sm:items-center sm:justify-between">
-          <span>InsightAI sample workspace</span>
-          <span>Demo data — no real customer information</span>
+          <span>
+            {uploadedFilename ? "InsightAI session workspace" : "InsightAI sample workspace"}
+          </span>
+          <span>
+            {uploadedFilename
+              ? "Session data — not uploaded or stored"
+              : "Demo data — no real customer information"}
+          </span>
         </footer>
       </div>
     </>
@@ -269,9 +317,48 @@ function DashboardContent({
 }
 
 function DashboardWorkspace() {
-  const { choosePreset, filters, isPending, resetFilters, updateFilters } = useDashboardFilters();
-  const analytics = useDashboardAnalytics(filters);
+  const { choosePreset, filters, isPending, replaceFilters, resetFilters, updateFilters } =
+    useDashboardFilters();
+  const [uploadedDataset, setUploadedDataset] = useState<{
+    readonly dataset: ValidatedDataset;
+    readonly filename: string;
+  } | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const analytics = useDashboardAnalytics(filters, uploadedDataset?.dataset ?? null);
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
+
+  const openUpload = useCallback(() => setUploadOpen(true), []);
+  const useDemo = useCallback(() => {
+    setUploadedDataset(null);
+    setEvidenceSelection(null);
+    resetFilters();
+  }, [resetFilters]);
+  const clearUploaded = useCallback(() => {
+    setUploadedDataset(null);
+    setEvidenceSelection(null);
+    resetFilters();
+  }, [resetFilters]);
+  const completeUpload = useCallback(
+    (dataset: ValidatedDataset, filename: string) => {
+      setUploadedDataset({ dataset, filename });
+      setEvidenceSelection(null);
+      replaceFilters({
+        preset: "custom",
+        start: dataset.metadata.dateRange.start,
+        end: dataset.metadata.dateRange.end,
+        category: null,
+        region: null,
+        channel: null,
+        productId: null,
+      });
+      setUploadOpen(false);
+    },
+    [replaceFilters],
+  );
+
+  if (uploadOpen) {
+    return <UploadWorkflow onComplete={completeUpload} onCancel={() => setUploadOpen(false)} />;
+  }
 
   if (analytics.status === "loading") return <DashboardSkeleton />;
   if (analytics.status === "error") return <ErrorState message={analytics.message} />;
@@ -305,6 +392,10 @@ function DashboardWorkspace() {
         onInspectEvidence={setEvidenceSelection}
         onReset={resetFilters}
         onUpdateFilters={updateFilters}
+        onOpenUpload={openUpload}
+        onUseDemo={useDemo}
+        onClearUploaded={clearUploaded}
+        uploadedFilename={uploadedDataset?.filename ?? null}
         options={analytics.value.filterOptions}
       />
       <EvidenceDrawer selection={evidenceSelection} onClose={() => setEvidenceSelection(null)} />

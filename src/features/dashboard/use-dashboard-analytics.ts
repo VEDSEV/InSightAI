@@ -26,11 +26,28 @@ type DashboardAnalyticsSource =
 type DashboardAnalyticsState =
   Exclude<DashboardAnalyticsSource, { readonly status: "source_ready" }> | DashboardViewModelResult;
 
-export function useDashboardAnalytics(filters: DashboardFilterState): DashboardAnalyticsState {
+export function useDashboardAnalytics(
+  filters: DashboardFilterState,
+  suppliedDataset: ValidatedDataset | null = null,
+): DashboardAnalyticsState {
   const [source, setSource] = useState<DashboardAnalyticsSource>({ status: "loading" });
+  const suppliedSource = useMemo<DashboardAnalyticsSource | null>(() => {
+    if (suppliedDataset === null) return null;
+    const engine = createAnalyticsEngine(suppliedDataset);
+    return {
+      status: "source_ready",
+      dataset: suppliedDataset,
+      engine,
+      filterOptions: createDashboardFilterOptions(suppliedDataset),
+    };
+  }, [suppliedDataset]);
 
   useEffect(() => {
     let active = true;
+    if (suppliedDataset !== null)
+      return () => {
+        active = false;
+      };
     loadDashboardSampleDataset()
       .then((loaded) => {
         if (!active) return;
@@ -57,10 +74,16 @@ export function useDashboardAnalytics(filters: DashboardFilterState): DashboardA
     return () => {
       active = false;
     };
-  }, []);
+  }, [suppliedDataset]);
 
   return useMemo<DashboardAnalyticsState>(() => {
-    if (source.status !== "source_ready") return source;
-    return createDashboardViewModel(source.engine, source.dataset, filters, source.filterOptions);
-  }, [filters, source]);
+    const activeSource = suppliedSource ?? source;
+    if (activeSource.status !== "source_ready") return activeSource;
+    return createDashboardViewModel(
+      activeSource.engine,
+      activeSource.dataset,
+      filters,
+      activeSource.filterOptions,
+    );
+  }, [filters, source, suppliedSource]);
 }

@@ -194,4 +194,15 @@ describe("Overview dashboard", () => {
     expect(screen.queryByRole("dialog", { name: "Filters" })).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
   });
+
+  it("offers an accessible CSV upload workspace without replacing the demo dataset", async () => {
+    const user = userEvent.setup();
+    useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
+    render(<OverviewDashboard />);
+
+    await user.click(screen.getByRole("button", { name: "Upload CSV" }));
+    expect(screen.getByRole("heading", { name: "Analyze your data" })).toBeInTheDocument();
+    expect(screen.getByText(/UTF-8 CSV only/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Choose CSV" })).toBeInTheDocument();
+  });
 });

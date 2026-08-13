@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
 import { formatMetricValue } from "@/features/dashboard/presentation-formatters";
+import { AiExplanation } from "@/features/dashboard/ai-explanation";
 
 const severityVariant = {
   critical: "destructive",
@@ -32,9 +33,13 @@ function readableCategory(category: Finding["category"]): string {
 export function FindingsPanel({
   findings,
   onInspect,
+  datasetFingerprint,
+  uploadedDataset,
 }: {
   readonly findings: FindingsResult | undefined;
   readonly onInspect: (finding: Finding) => void;
+  readonly datasetFingerprint: string;
+  readonly uploadedDataset: boolean;
 }) {
   if (!findings) return null;
   return (
@@ -83,6 +88,12 @@ export function FindingsPanel({
                   Details
                 </Button>
               </div>
+              <AiExplanation
+                key={`${datasetFingerprint}:${finding.findingId}`}
+                datasetFingerprint={datasetFingerprint}
+                finding={finding}
+                uploadedDataset={uploadedDataset}
+              />
             </Card>
           ))}
         </div>

@@ -261,6 +261,16 @@ stable ranking. It neither parses raw CSV nor imports dashboard presentation cod
 adapter asks it for a bounded top-six view using the same filter context, and the findings drawer
 reveals the original engine evidence plus rule metadata.
 
+### Phase 7 grounded-AI boundary
+
+`src/app/api/ai/explain/route.ts` is the only dashboard-facing AI invocation boundary. Client
+components create a minimized, typed evidence packet and receive only sanitized result/error objects;
+they do not import the provider, SDK, or environment configuration. `src/ai/provider.ts` owns the
+server-side OpenAI Responses API integration, strict JSON Schema output, `store: false`, timeout, and
+bounded retry policy. `src/ai/service.ts` owns cache isolation and the final local validation pass.
+Deterministic findings remain available when a provider is absent, refuses a request, times out, is
+rate limited, or fails grounding.
+
 ## Error and quality model
 
 Expected error categories are input validation, unsupported semantics, insufficient data,

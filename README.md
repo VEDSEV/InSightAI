@@ -1,14 +1,20 @@
 # InsightAI
 
+## Grounded AI boundary
+
+Phase 7 AI explanations are optional and server-side. They interpret minimized, deterministic
+findings evidence; they do not calculate metrics, receive raw CSV by default, or replace findings.
+When an API key is absent, the product uses a visibly labeled deterministic mock. A configured live
+provider uses the OpenAI Responses API with strict structured output, `store: false`, and independent
+local evidence, numerical, claim, and recommendation validation.
+
 InsightAI is an evidence-first business intelligence platform for small e-commerce teams. The product
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phases 2 and 3 are approved and merged. Phase 4 is in progress on
-> `feat/phase-4-interactive-dashboard`: the Overview uses the public deterministic analytics API
-> with the approved synthetic dataset, interactive filters, charts, and bounded evidence details.
-> Uploads, authentication, persistence, AI, forecasting, causal analysis, report export, and
-> deployment remain out of scope.
+> **Current status:** Phases 2 through 6 are approved and merged. Phase 7 is complete and approved
+> on `feat/phase-7-grounded-ai`, pending merge. AI remains optional and advisory; authentication, persistence,
+> chat, forecasting, causal analysis, report export, deployment, and Phase 8 work remain out of scope.
 
 ## Product principles
 

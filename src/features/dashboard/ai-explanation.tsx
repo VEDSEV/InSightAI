@@ -158,6 +158,9 @@ function AiExplanationState({
             The summary excludes raw CSV rows, customer IDs, order IDs, order-line IDs, and
             unrelated uploaded fields. It is advisory and does not establish causation.
           </p>
+          <p className="text-muted-foreground text-xs">
+            AI is optional. You can keep using deterministic analytics without it.
+          </p>
           <label className="flex items-start gap-2 text-sm">
             <input
               type="checkbox"
@@ -200,10 +203,26 @@ function AiExplanationState({
             </p>
           </section>
           <section>
+            <p className="font-semibold">Questions to investigate</p>
+            <ul className="text-muted-foreground mt-1 list-disc space-y-1 pl-5 text-sm">
+              {result.value.questionsToInvestigate.map((question) => (
+                <li key={question}>{question}</li>
+              ))}
+            </ul>
+          </section>
+          <section>
             <p className="font-semibold">Evidence references</p>
             <p className="text-muted-foreground mt-1 text-sm">
               {result.value.evidenceReferences.join(", ")}
             </p>
+          </section>
+          <section>
+            <p className="font-semibold">Limitations</p>
+            <ul className="text-muted-foreground mt-1 list-disc space-y-1 pl-5 text-sm">
+              {result.value.limitations.map((limitation) => (
+                <li key={limitation}>{limitation}</li>
+              ))}
+            </ul>
           </section>
           <p className="text-muted-foreground text-xs">{result.value.confidenceLanguage}</p>
         </Card>

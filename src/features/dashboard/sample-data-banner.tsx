@@ -40,7 +40,7 @@ export function SampleDataBanner({
           <p className="text-muted-foreground mt-1 text-xs leading-5">
             {demo
               ? "No real customer data. Explore representative order performance and business signals."
-              : "Prepared in this browser session. It is not uploaded, persisted, or sent to AI."}
+              : "Your raw file stays in this browser session. Explain with AI sends only a reviewed, minimized summary—not your raw file or rows."}
           </p>
         </div>
       </div>

@@ -64,6 +64,27 @@ describe("Phase 5 ingestion core", () => {
     expect(prepared.dataset?.rows[0]?.orderLineId).toBe("00001");
     expect(prepared.reconciliation.totals.revenueCents).toBe(4400);
     expect(prepared.reconciliation.totals.grossProfitCents).toBe(2200);
+    expect(prepared.readiness).toMatchObject({ status: "ready", returnStep: null });
+  });
+
+  it("keeps extra optional source columns informational and preserves one authoritative ready state", () => {
+    const csv = `${renamedHeader},Customer Name,Discount Percent\n${validRows.replaceAll("\n", ",Synthetic Customer One,5\n")},Synthetic Customer Two,0`;
+    const parsed = parsedFixture(csv);
+    const mapping = mappingFromSuggestions(suggestUploadMappings(parsed));
+    const prepared = prepareUploadedDataset({
+      parsed,
+      mapping,
+      transformations: { ...DEFAULT_TRANSFORMATIONS, dateFormat: "mdy" },
+    });
+
+    expect(mapping.customer_segment).toBe("Segment");
+    expect(mapping.discount_amount).toBe("Discount");
+    expect(prepared.reconciliation.unmappedSourceColumns).toEqual(
+      expect.arrayContaining(["Customer Name", "Discount Percent"]),
+    );
+    expect(prepared.reconciliation.blockingIssueCount).toBe(0);
+    expect(prepared.canAnalyze).toBe(true);
+    expect(prepared.readiness).toMatchObject({ status: "ready", returnStep: null });
   });
 
   it("rejects ambiguous numeric dates until the user selects an interpretation", () => {
@@ -88,6 +109,10 @@ describe("Phase 5 ingestion core", () => {
     });
     expect(blocked.requiresExclusionApproval).toBe(true);
     expect(blocked.dataset).toBeNull();
+    expect(blocked.readiness).toMatchObject({
+      status: "exclusion_approval_required",
+      returnStep: "Transform",
+    });
     expect(blocked.rows.find((row) => row.sourceRowNumber === 4)?.disposition).toBe("rejected");
     const allowed = prepareUploadedDataset({
       parsed,
@@ -96,6 +121,7 @@ describe("Phase 5 ingestion core", () => {
       allowRowExclusions: true,
     });
     expect(allowed.canAnalyze).toBe(true);
+    expect(allowed.readiness).toMatchObject({ status: "ready", returnStep: null });
     expect(allowed.reconciliation.rejectedRows).toBe(1);
   });
 
@@ -121,6 +147,11 @@ describe("Phase 5 ingestion core", () => {
       transformations: { ...DEFAULT_TRANSFORMATIONS, dateFormat: "mdy" },
     });
     expect(prepared.issues.some((issue) => issue.code === "required_target_unmapped")).toBe(true);
+    expect(prepared.canAnalyze).toBe(false);
+    expect(prepared.readiness).toMatchObject({
+      status: "mapping_blocked",
+      returnStep: "Map columns",
+    });
   });
 
   it("keeps formula-like strings inert, surfaces their warning, and retains field audit values", () => {

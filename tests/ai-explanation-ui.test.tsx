@@ -100,6 +100,9 @@ describe("AiExplanation", () => {
     expect(screen.getByRole("dialog", { name: /ai privacy review/i })).toBeInTheDocument();
     expect(screen.getByText(/view what will be sent/i)).toBeInTheDocument();
     expect(screen.getByText(/raw csv is not sent/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/AI is optional.*deterministic analytics without it/i),
+    ).toBeInTheDocument();
     expect(screen.queryByText("LINE-PRIVATE")).not.toBeInTheDocument();
     expect(screen.queryByText("ORD-PRIVATE")).not.toBeInTheDocument();
 
@@ -109,6 +112,45 @@ describe("AiExplanation", () => {
     expect(screen.getByRole("button", { name: /continue/i })).toBeDisabled();
     await user.click(consent);
     expect(screen.getByRole("button", { name: /continue/i })).toBeEnabled();
+  });
+
+  it("keeps uploaded analytics local after declining, then permits a consented mock explanation", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(
+        successfulResponse(
+          baseFinding,
+          "The uploaded-data concentration signal remains descriptive.",
+          "evidence:region-a",
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+    render(
+      <AiExplanation datasetFingerprint="uploaded-test" finding={baseFinding} uploadedDataset />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /explain with ai/i }));
+    await user.click(screen.getByRole("button", { name: /keep analytics local/i }));
+    expect(screen.queryByRole("dialog", { name: /ai privacy review/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /explain with ai/i })).toBeEnabled();
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole("button", { name: /explain with ai/i }));
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /consent to this minimized summary.*browser session only/i,
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: /continue with ai/i }));
+
+    expect(
+      await screen.findByText(/AI-generated explanation.*development mock/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("The uploaded-data concentration signal remains descriptive."),
+    ).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("labels development-mock output and separates its explanation sections", async () => {
@@ -135,7 +177,9 @@ describe("AiExplanation", () => {
     expect(screen.getByText("Verified fact")).toBeInTheDocument();
     expect(screen.getByText("AI interpretation")).toBeInTheDocument();
     expect(screen.getByText("Suggested action")).toBeInTheDocument();
+    expect(screen.getByText("Questions to investigate")).toBeInTheDocument();
     expect(screen.getByText("Evidence references")).toBeInTheDocument();
+    expect(screen.getByText("Limitations")).toBeInTheDocument();
     expect(screen.queryByText("LINE-PRIVATE")).not.toBeInTheDocument();
   });
 

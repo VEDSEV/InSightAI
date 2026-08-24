@@ -46,3 +46,28 @@ a browser-local FNV-1a identity derived from its validated metadata and canonica
 packet is created, plus a new upload-session generation; the raw rows used to make that identity
 never leave the browser. Replacing or clearing an upload remounts the explanation state and creates
 a different context.
+
+## Browser QA fixture for uploaded-data consent
+
+`tests/fixtures/ingestion/phase7-ai-consent-qa.csv` is a 14-row synthetic-only CSV for manual
+browser validation. It covers 15 January 2024 through 10 December 2025, maps directly through the
+standard ingestion suggestions, and has no rejected rows. Twelve of its fourteen distinct orders
+use the `Web` channel, so the normal findings engine produces the supported channel finding:
+`Web accounts for 85.7% of revenue in the active selection.` The concentration threshold is 30.0%
+and the finding has twelve supporting orders, exceeding the five-order minimum.
+
+Use this fixture to complete the upload, confirm the ready state, open the dashboard, and select
+**Explain with AI** on the Web concentration finding. Before consent, verify that the privacy review
+states that raw CSV and rows are excluded and that only a minimized evidence summary may be sent.
+Choose **Keep analytics local** once to confirm findings remain usable, then reopen the review,
+provide session consent, and generate the visibly labelled development-mock explanation when no
+`OPENAI_API_KEY` is configured. Finally, change a filter and replace or clear the upload to confirm
+the explanation is removed; return to demo data to confirm no uploaded context remains.
+
+## Manual browser QA completion
+
+Manual browser QA completed on 2026-08-23 using the fixture above and the development-mock provider.
+It passed the upload-readiness/dashboard handoff, uploaded-data privacy review, consent decline and
+reopen flow, grounded finding/evidence/explanation consistency, stale-explanation invalidation after
+filter changes, and uploaded-data-to-demo dataset isolation. This record covers the offline mock
+flow only; no live-provider smoke test is implied.

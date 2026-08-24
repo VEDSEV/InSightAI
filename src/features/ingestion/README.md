@@ -20,7 +20,15 @@ null during canonical normalization; an absent optional discount is explicitly d
 The resulting rows use the supported public normalization and validation boundary, then create the
 same dataset-bound engine and dashboard adapter as the demo. Invalid rows require an explicit
 exclusion approval before analytics; no source row is silently dropped. There is no upload storage,
-telemetry of raw CSV contents, object URL retention, or AI call in Phase 5.
+telemetry of raw CSV contents, object URL retention, or direct AI call in Phase 5. Phase 7 can send
+only a minimized evidence packet after a user explicitly requests an explanation and completes the
+privacy review; raw files and rows are not included in that packet.
+
+One readiness state controls the full handoff: required mappings must be complete, rejected rows
+must be corrected or explicitly excluded, and the resulting candidate dataset must pass analytics
+validation. Extra unmapped source columns are informational only. The same readiness state controls
+the reconciliation status, navigation to dashboard opening, and whether the dashboard button is
+enabled.
 
 `pnpm benchmark:ingestion` measures a small 24-row fixture, the approved 6,909-row fixture, and a
 50,000-row shape fixture. On the recorded local run, parse/mapping/preparation were respectively

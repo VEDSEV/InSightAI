@@ -256,6 +256,11 @@ export function UploadWorkflow({
   const mappingErrorCount =
     preparation?.issues.filter((item) => item.severity === "error" && item.category === "mapping")
       .length ?? 0;
+  const isReadyToAnalyze = preparation?.readiness.status === "ready";
+  const readinessReturnStep =
+    preparation && preparation.readiness.status !== "ready"
+      ? preparation.readiness.returnStep
+      : null;
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
@@ -264,8 +269,9 @@ export function UploadWorkflow({
           <p className="text-primary text-sm font-semibold">Session-only data import</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em]">Analyze your data</h1>
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
-            Map a CSV into InsightAI’s canonical commerce model. Files stay in this browser session
-            and are never sent to an AI service.
+            Your raw file and rows stay in this browser session. If you choose Explain with AI and
+            confirm the privacy review, InsightAI may send only a minimized summary—not your raw
+            file or rows—to the configured AI provider.
           </p>
         </div>
         <Button variant="ghost" onClick={onCancel}>
@@ -566,37 +572,50 @@ export function UploadWorkflow({
             {preparation.reconciliation.unmappedSourceColumns.length
               ? preparation.reconciliation.unmappedSourceColumns.join(", ")
               : "None"}
-            .
+            . Extra source columns are not required for analysis unless you map them.
           </div>
-          {preparation.canAnalyze ? (
+          {isReadyToAnalyze ? (
             <div className="bg-success-subtle flex gap-3 rounded-card p-4 text-sm">
               <ShieldCheck aria-hidden="true" className="text-success-strong mt-0.5 size-5" />
-              This session dataset passed the canonical validation boundary and is ready for the
-              existing analytics engine.
+              {preparation.readiness.message}
             </div>
           ) : (
             <div className="bg-destructive-subtle flex gap-3 rounded-card p-4 text-sm">
               <AlertTriangle aria-hidden="true" className="text-destructive-strong mt-0.5 size-5" />
-              Resolve blocking mapping/validation problems
-              {preparation.requiresExclusionApproval
-                ? " or explicitly approve the listed row exclusions"
-                : ""}{" "}
-              before opening the dashboard.
+              <div>
+                <p className="font-semibold">{preparation.readiness.title}</p>
+                <p className="mt-1">{preparation.readiness.message}</p>
+                {readinessReturnStep ? (
+                  <Button
+                    className="mt-3"
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => setStep(readinessReturnStep)}
+                  >
+                    Return to {readinessReturnStep}
+                  </Button>
+                ) : null}
+              </div>
             </div>
           )}
         </Card>
       ) : null}
       {parsed && preparation && step === "Open dashboard" ? (
         <Card className="p-6 text-center">
-          <Check aria-hidden="true" className="text-success-strong mx-auto size-10" />
-          <h2 className="mt-3 text-xl font-semibold">Ready to analyze</h2>
+          {isReadyToAnalyze ? (
+            <Check aria-hidden="true" className="text-success-strong mx-auto size-10" />
+          ) : (
+            <AlertTriangle aria-hidden="true" className="text-destructive-strong mx-auto size-10" />
+          )}
+          <h2 className="mt-3 text-xl font-semibold">{preparation.readiness.title}</h2>
           <p className="text-muted-foreground mx-auto mt-2 max-w-xl text-sm">
-            The uploaded dataset is session-only and will be analyzed through InsightAI’s existing
-            deterministic engine. Switching datasets resets dashboard filters.
+            {isReadyToAnalyze
+              ? "The uploaded dataset is session-only and will be analyzed through InsightAI’s existing deterministic engine. Switching datasets resets dashboard filters."
+              : preparation.readiness.message}
           </p>
           <Button
             className="mt-5"
-            disabled={!preparation.dataset}
+            disabled={!isReadyToAnalyze || !preparation.dataset}
             onClick={() => preparation.dataset && onComplete(preparation.dataset, parsed.filename)}
           >
             Open uploaded dashboard
@@ -615,7 +634,13 @@ export function UploadWorkflow({
               Review reconciliation
             </Button>
           ) : (
-            <Button disabled={step === "Map columns" && mappingErrorCount > 0} onClick={next}>
+            <Button
+              disabled={
+                (step === "Map columns" && mappingErrorCount > 0) ||
+                (step === "Reconcile" && !isReadyToAnalyze)
+              }
+              onClick={next}
+            >
               Continue
               <ArrowRight aria-hidden="true" className="size-4" />
             </Button>

@@ -134,7 +134,7 @@ Phase 5 is the active implementation scope.
 ## Phase 5 — Data upload, validation, cleaning, and column mapping
 
 **Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
-Phase 6 is the active implementation scope.
+Phase 7 is the active implementation scope.
 
 **Goal:** let a user safely transform a familiar export into the canonical schema.
 
@@ -154,7 +154,7 @@ Phase 6 is the active implementation scope.
 
 ## Phase 6 — Automated findings, risks, and opportunities
 
-**Status:** In progress on `feat/phase-6-deterministic-findings`; not yet committed or merged.
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
 
 **Goal:** prioritize deterministic observations without using generative AI.
 
@@ -176,6 +176,8 @@ policy; it does not reimplement the underlying calculations.
 - Users can see why a finding appeared and which filters/periods produced it.
 
 ## Phase 7 — AI explanations and evidence-based recommendations
+
+**Status:** Complete and approved on `feat/phase-7-grounded-ai`; not yet merged into `master`.
 
 **Goal:** add useful narrative while retaining deterministic facts and visible uncertainty.
 

@@ -117,3 +117,11 @@ measurements are not universal production guarantees.
 
 - **Findings engine:** deterministic rule outputs, bounded evidence, materiality suppression,
   ranking, filter propagation, scenario detection, and non-causal/non-prescriptive language.
+
+## Phase 7 verification groups
+
+- **Provider contract:** minimized packet size and identifier exclusion, strict output-shape checks,
+  mock-only deterministic tests, cache isolation by immutable packet/provider identity, numerical and
+  citation grounding, causal-claim rejection, and safe recommendation policy checks.
+- **Secret boundary:** client presentation code may call the sanitized API route only; the OpenAI SDK
+  and `OPENAI_API_KEY` remain in server-side provider code.

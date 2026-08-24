@@ -133,6 +133,19 @@ export type UploadReconciliation = Readonly<{
     marketingSpendCents: number;
   }>;
 }>;
+export type UploadReadiness =
+  | Readonly<{
+      status: "ready";
+      title: "Ready to analyze";
+      message: string;
+      returnStep: null;
+    }>
+  | Readonly<{
+      status: "mapping_blocked" | "exclusion_approval_required" | "validation_blocked";
+      title: "More information is needed before analysis";
+      message: string;
+      returnStep: "Map columns" | "Transform" | "Review quality";
+    }>;
 export type IngestionPreparation = Readonly<{
   parsed: ParsedUpload;
   mapping: UploadMapping;
@@ -141,6 +154,7 @@ export type IngestionPreparation = Readonly<{
   issues: readonly UploadIssue[];
   reconciliation: UploadReconciliation;
   dataset: ValidatedDataset | null;
+  readiness: UploadReadiness;
   canAnalyze: boolean;
   requiresExclusionApproval: boolean;
 }>;
@@ -786,6 +800,50 @@ function metadata(range: DatasetMetadata["dateRange"]): DatasetMetadata {
   });
 }
 
+function firstBlockingMessage(issues: readonly UploadIssue[]): string | null {
+  return issues.find((issue) => issue.severity === "error")?.message ?? null;
+}
+
+function determineReadiness(input: {
+  mappingIssues: readonly UploadIssue[];
+  rejectedRows: number;
+  allowRowExclusions: boolean;
+  dataset: ValidatedDataset | null;
+  issues: readonly UploadIssue[];
+}): UploadReadiness {
+  if (input.mappingIssues.some((issue) => issue.severity === "error"))
+    return Object.freeze({
+      status: "mapping_blocked",
+      title: "More information is needed before analysis",
+      message:
+        firstBlockingMessage(input.mappingIssues) ??
+        "Map the required columns before InsightAI can check this data.",
+      returnStep: "Map columns",
+    });
+  if (input.rejectedRows > 0 && !input.allowRowExclusions)
+    return Object.freeze({
+      status: "exclusion_approval_required",
+      title: "More information is needed before analysis",
+      message: `${input.rejectedRows} row${input.rejectedRows === 1 ? " needs" : "s need"} your review. Fix the listed values or explicitly approve excluding those rows before analysis.`,
+      returnStep: "Transform",
+    });
+  if (!input.dataset)
+    return Object.freeze({
+      status: "validation_blocked",
+      title: "More information is needed before analysis",
+      message:
+        firstBlockingMessage(input.issues) ??
+        "InsightAI could not validate this data for analysis. Review the data check and correct the listed issue.",
+      returnStep: "Review quality",
+    });
+  return Object.freeze({
+    status: "ready",
+    title: "Ready to analyze",
+    message: "Your data passed the required checks and is ready for InsightAI to analyze.",
+    returnStep: null,
+  });
+}
+
 export function prepareUploadedDataset(input: {
   parsed: ParsedUpload;
   mapping: UploadMapping;
@@ -972,6 +1030,13 @@ export function prepareUploadedDataset(input: {
         : null,
     totals: Object.freeze(totals),
   });
+  const readiness = determineReadiness({
+    mappingIssues,
+    rejectedRows: rejected.length,
+    allowRowExclusions: input.allowRowExclusions ?? false,
+    dataset,
+    issues,
+  });
   return Object.freeze({
     parsed: input.parsed,
     mapping: Object.freeze({ ...input.mapping }),
@@ -980,7 +1045,8 @@ export function prepareUploadedDataset(input: {
     issues: Object.freeze(issues),
     reconciliation,
     dataset,
-    canAnalyze: dataset !== null,
+    readiness,
+    canAnalyze: readiness.status === "ready",
     requiresExclusionApproval: rejected.length > 0 && !input.allowRowExclusions,
   });
 }

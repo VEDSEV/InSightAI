@@ -1,6 +1,6 @@
 # InsightAI Responsible AI and Evidence Policy
 
-**Status:** binding design policy; AI implementation is out of scope until Phase 7
+**Status:** binding design policy; Phase 7 implementation is in progress and remains advisory-only
 
 ## Purpose
 
@@ -191,4 +191,8 @@ AI work may begin only when:
 5. the UI can display sources, caveats, and failures clearly;
 6. provider retention/privacy terms for the chosen configuration are documented.
 
-Until then, `aiEnabled` remains false and no model SDK or placeholder AI result is added.
+Phase 7 uses a server-only OpenAI Responses API adapter only when `OPENAI_API_KEY` is configured.
+It sends a minimized evidence packet under strict structured output with `store: false`; this does
+not replace the provider organization’s broader retention or data-use controls. Without a key, only
+the clearly labeled deterministic mock is available. The browser never receives credentials, raw
+provider exceptions, or full provider request/response payloads.

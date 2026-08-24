@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   CircleDollarSign,
   Gauge,
@@ -68,6 +68,17 @@ const primaryKpiPresentation = {
       "Customers with at least two distinct orders within the active selection, divided by unique customers.",
   },
 } as const;
+
+/** A local source identity only; raw rows never leave the browser to form it. */
+function createDatasetFingerprint(dataset: ValidatedDataset): string {
+  const serialized = JSON.stringify({ metadata: dataset.metadata, rows: dataset.rows });
+  let hash = 2_166_136_261;
+  for (let index = 0; index < serialized.length; index += 1) {
+    hash ^= serialized.charCodeAt(index);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return `uploaded-fnv1a-${(hash >>> 0).toString(16)}-${dataset.rows.length}`;
+}
 
 function DashboardSkeleton() {
   return (
@@ -137,6 +148,7 @@ function DashboardContent({
   onOpenUpload,
   onUseDemo,
   options,
+  aiDatasetFingerprint,
   uploadedFilename,
   viewModel,
 }: {
@@ -152,6 +164,7 @@ function DashboardContent({
   readonly onOpenUpload: () => void;
   readonly onUseDemo: () => void;
   readonly options: DashboardFilterOptions;
+  readonly aiDatasetFingerprint: string;
   readonly uploadedFilename: string | null;
   readonly viewModel: DashboardViewModel;
 }) {
@@ -253,7 +266,12 @@ function DashboardContent({
           </Card>
         )}
 
-        <FindingsPanel findings={viewModel.findings} onInspect={onInspectFinding} />
+        <FindingsPanel
+          findings={viewModel.findings}
+          onInspect={onInspectFinding}
+          datasetFingerprint={aiDatasetFingerprint}
+          uploadedDataset={Boolean(uploadedFilename)}
+        />
 
         <section aria-labelledby="breakdown-analysis-title">
           <SectionHeader
@@ -329,7 +347,9 @@ function DashboardWorkspace() {
   const [uploadedDataset, setUploadedDataset] = useState<{
     readonly dataset: ValidatedDataset;
     readonly filename: string;
+    readonly aiDatasetFingerprint: string;
   } | null>(null);
+  const uploadGeneration = useRef(0);
   const [uploadOpen, setUploadOpen] = useState(false);
   const analytics = useDashboardAnalytics(filters, uploadedDataset?.dataset ?? null);
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
@@ -350,7 +370,12 @@ function DashboardWorkspace() {
   }, [resetFilters]);
   const completeUpload = useCallback(
     (dataset: ValidatedDataset, filename: string) => {
-      setUploadedDataset({ dataset, filename });
+      uploadGeneration.current += 1;
+      setUploadedDataset({
+        dataset,
+        filename,
+        aiDatasetFingerprint: `${createDatasetFingerprint(dataset)}-session-${uploadGeneration.current}`,
+      });
       setEvidenceSelection(null);
       setFindingSelection(null);
       replaceFilters({
@@ -408,6 +433,9 @@ function DashboardWorkspace() {
         onUseDemo={useDemo}
         onClearUploaded={clearUploaded}
         uploadedFilename={uploadedDataset?.filename ?? null}
+        aiDatasetFingerprint={
+          uploadedDataset?.aiDatasetFingerprint ?? analytics.value.datasetVersion
+        }
         options={analytics.value.filterOptions}
       />
       <EvidenceDrawer selection={evidenceSelection} onClose={() => setEvidenceSelection(null)} />

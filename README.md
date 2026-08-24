@@ -1,14 +1,20 @@
 # InsightAI
 
+## Grounded AI boundary
+
+Phase 7 AI explanations are optional and server-side. They interpret minimized, deterministic
+findings evidence; they do not calculate metrics, receive raw CSV by default, or replace findings.
+When an API key is absent, the product uses a visibly labeled deterministic mock. A configured live
+provider uses the OpenAI Responses API with strict structured output, `store: false`, and independent
+local evidence, numerical, claim, and recommendation validation.
+
 InsightAI is an evidence-first business intelligence platform for small e-commerce teams. The product
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phases 2 and 3 are approved and merged. Phase 4 is in progress on
-> `feat/phase-4-interactive-dashboard`: the Overview uses the public deterministic analytics API
-> with the approved synthetic dataset, interactive filters, charts, and bounded evidence details.
-> Uploads, authentication, persistence, AI, forecasting, causal analysis, report export, and
-> deployment remain out of scope.
+> **Current status:** Phases 2 through 6 are approved and merged. Phase 7 is complete and approved
+> on `feat/phase-7-grounded-ai`, pending merge. AI remains optional and advisory; authentication, persistence,
+> chat, forecasting, causal analysis, report export, deployment, and Phase 8 work remain out of scope.
 
 ## Product principles
 
@@ -244,10 +250,11 @@ judgment reviewable.
 
 ## Scope guardrails
 
-Phase 5 adds CSV ingestion in the current browser session only. Authentication, persistence,
-external storage, generative AI, chat, forecasting, causal claims, report export, and deployment
-remain out of scope. Synthetic source rows, uploaded source rows, validated canonical rows,
-authoritative analytics results, UI presentation, and future AI outputs remain distinct boundaries.
+Phase 5 adds CSV ingestion in the current browser session only. Phase 7 adds optional, bounded AI
+explanations behind explicit privacy review and consent. Authentication, persistence, external
+storage, AI chat, forecasting, causal claims, report export, and deployment remain out of scope.
+Synthetic source rows, uploaded source rows, validated canonical rows, authoritative analytics
+results, UI presentation, and AI outputs remain distinct boundaries.
 
 ## CSV ingestion (Phase 5)
 
@@ -262,10 +269,12 @@ and discount amount are optional; an unmapped optional discount defaults explici
 recorded in the audit. Dates reject ambiguous numeric forms until the user chooses an interpretation.
 Configured currency symbols and grouping separators can be removed before exact-cent validation.
 
-Uploaded cells are parsed as inert text: formulas and HTML are never evaluated, and raw rows are not
-sent over the network or to an AI provider. The session can be cleared or switched back to the demo
-dataset at any time. A validated upload is handed to the same public Phase 3 engine and Phase 4
-adapter as the demo dataset; it does not use a second analytics path.
+Uploaded cells are parsed as inert text: formulas and HTML are never evaluated. Raw files and rows
+remain in the browser session; they are not included in AI requests. If a user explicitly requests
+an AI explanation and completes the privacy review, only a minimized evidence summary for that
+explanation may be sent to the configured provider. The session can be cleared or switched back to
+the demo dataset at any time. A validated upload is handed to the same public Phase 3 engine and
+Phase 4 adapter as the demo dataset; it does not use a second analytics path.
 
 ## Deterministic findings (Phase 6)
 

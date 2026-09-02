@@ -125,3 +125,11 @@ measurements are not universal production guarantees.
   citation grounding, causal-claim rejection, and safe recommendation policy checks.
 - **Secret boundary:** client presentation code may call the sanitized API route only; the OpenAI SDK
   and `OPENAI_API_KEY` remain in server-side provider code.
+
+## Phase 8 verification groups
+
+- **Founder experience:** the default Home maps authoritative `DashboardViewModel` values into a
+  plain-language snapshot and Insights without exposing advanced filters by default; Explore still
+  exposes the existing shared advanced workspace.
+- **Progressive disclosure:** founder navigation, advanced-view switching, upload entry, and
+  evidence/detail actions remain keyboard-operable and preserve the public analytics boundary.

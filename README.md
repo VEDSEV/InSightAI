@@ -12,9 +12,10 @@ InsightAI is an evidence-first business intelligence platform for small e-commer
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phases 2 through 6 are approved and merged. Phase 7 is complete and approved
-> on `feat/phase-7-grounded-ai`, pending merge. AI remains optional and advisory; authentication, persistence,
-> chat, forecasting, causal analysis, report export, deployment, and Phase 8 work remain out of scope.
+> **Current status:** Phases 2 through 7 are approved and merged. Phase 8 establishes a founder-first
+> experience on top of the existing deterministic analytics, findings, upload, and grounded-AI boundaries.
+> AI remains optional and advisory; chat, authentication, persistence, forecasting, causal analysis,
+> report export, and deployment remain out of scope.
 
 ## Product principles
 
@@ -61,6 +62,15 @@ Uploaded file (Phase 5)
 See [Architecture](docs/ARCHITECTURE.md), [Analytics specification](docs/ANALYTICS_SPEC.md),
 [engine reference](docs/ANALYTICS_ENGINE.md), [benchmark report](docs/ANALYTICS_BENCHMARKS.md), and
 [AI safety](docs/AI_SAFETY.md) for the full boundaries.
+
+## Founder Home and Explore
+
+The default **Founder Home** is designed for a small-business owner: a concise business snapshot,
+prioritized **Insights**, plain-language next checks, and a clear way to upload sales data. The
+existing **Explore** workspace remains available for filters, trends, breakdowns, data checks,
+evidence, methodology, and detailed performance investigation. Both views consume the same public
+analytics and findings outputs; neither duplicates business formulas. See the
+[Founder experience guide](docs/FOUNDER_EXPERIENCE.md) for the progressive-disclosure model.
 
 ## Phase 3 engine contract
 

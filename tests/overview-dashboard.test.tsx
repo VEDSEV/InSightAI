@@ -1,6 +1,6 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AppShell } from "@/components/layout/app-shell";
 import type { DashboardViewModel } from "@/features/dashboard/analytics-adapter";
@@ -170,7 +170,11 @@ const viewModel = {
 } as unknown as DashboardViewModel;
 
 describe("Overview dashboard", () => {
-  it("renders real-engine view-model values, active controls, and evidence details", async () => {
+  afterEach(() => {
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("starts in Founder Home with real-engine values and approachable insights", async () => {
     const user = userEvent.setup();
     useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
 
@@ -183,9 +187,23 @@ describe("Overview dashboard", () => {
     expect(screen.getByRole("main")).toBeInTheDocument();
     expect(screen.getByLabelText("Demo data notice")).toHaveTextContent("Demo commerce dataset");
     expect(screen.getByLabelText("Demo data notice")).toHaveTextContent("No real customer data");
-    expect(screen.queryByText(/deterministic analytics engine/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "How is your business doing?" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("$778.2K")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "What deserves attention?" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "What deserves your attention" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Linen Throw Set may be losing money")).toBeInTheDocument();
+    expect(screen.getByText("Jan 2024 – Dec 2025")).toBeInTheDocument();
+    expect(screen.queryByText("Comparison unavailable")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Explore your business with InsightAI" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "What should I investigate first?" })).toBeEnabled();
+    expect(screen.queryByLabelText("Category")).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Open advanced analytics" }));
     expect(screen.getByLabelText("Category")).not.toBeDisabled();
     expect(screen.getByLabelText("Region")).not.toBeDisabled();
     expect(screen.getByLabelText("Channel")).not.toBeDisabled();
@@ -198,11 +216,12 @@ describe("Overview dashboard", () => {
     expect(screen.getByText("LINE-0000001")).toBeInTheDocument();
   });
 
-  it("keeps deterministic finding details inspectable without recreating a business formula", async () => {
+  it("keeps detailed findings inspectable without recreating a business formula", async () => {
     const user = userEvent.setup();
     useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
     render(<OverviewDashboard />);
 
+    await user.click(screen.getAllByRole("button", { name: "Explore" })[1]);
     expect(screen.getByText("Linen Throw Set has negative aggregate margin")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Details" }));
     expect(
@@ -217,18 +236,30 @@ describe("Overview dashboard", () => {
     useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
     render(<OverviewDashboard />);
 
+    await user.click(screen.getByRole("button", { name: "Open advanced analytics" }));
+
     await user.selectOptions(screen.getByLabelText("Category"), "Home");
     expect(window.location.search).toContain("category=Home");
     expect(screen.getByRole("button", { name: "Reset filters" })).not.toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: "Reset filters" }));
     expect(window.location.search).not.toContain("category=Home");
+    expect(window.location.search).toContain("view=advanced");
+
+    await user.selectOptions(screen.getByLabelText("Region"), "West");
+    await user.click(screen.getByRole("button", { name: "Home" }));
+    expect(
+      screen.getByRole("heading", { name: "How is your business doing?" }),
+    ).toBeInTheDocument();
+    expect(window.location.search).toContain("region=West");
   });
 
   it("uses a compact mobile sheet that applies one complete filter state", async () => {
     const user = userEvent.setup();
     useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
     render(<OverviewDashboard />);
+
+    await user.click(screen.getByRole("button", { name: "Open advanced analytics" }));
 
     const trigger = screen.getByRole("button", { name: "Filters" });
     await user.click(trigger);
@@ -259,8 +290,10 @@ describe("Overview dashboard", () => {
     useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
     render(<OverviewDashboard />);
 
-    await user.click(screen.getByRole("button", { name: "Upload CSV" }));
-    expect(screen.getByRole("heading", { name: "Analyze your data" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Upload sales data" }));
+    expect(
+      screen.getByRole("heading", { name: "Bring your sales data to life" }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/UTF-8 CSV only/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Choose CSV" })).toBeInTheDocument();
   });

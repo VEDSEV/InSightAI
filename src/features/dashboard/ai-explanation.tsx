@@ -12,6 +12,7 @@ type AiExplanationProps = Readonly<{
   datasetFingerprint: string;
   finding: Finding;
   uploadedDataset?: boolean;
+  compactTrigger?: boolean;
 }>;
 
 type AiExplanationStateProps = AiExplanationProps &
@@ -29,6 +30,7 @@ export function AiExplanation({
   datasetFingerprint,
   finding,
   uploadedDataset = false,
+  compactTrigger = false,
 }: AiExplanationProps) {
   const [consent, setConsent] = useState(false);
   const packet = useMemo(
@@ -42,6 +44,7 @@ export function AiExplanation({
       datasetFingerprint={datasetFingerprint}
       finding={finding}
       uploadedDataset={uploadedDataset}
+      compactTrigger={compactTrigger}
       packet={packet}
       consent={consent}
       onConsentChange={setConsent}
@@ -54,6 +57,7 @@ function AiExplanationState({
   uploadedDataset,
   consent,
   onConsentChange,
+  compactTrigger,
 }: AiExplanationStateProps) {
   const [result, setResult] = useState<AiServiceResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -102,7 +106,7 @@ function AiExplanationState({
   };
 
   return (
-    <div className="border-border border-t pt-3">
+    <div className={compactTrigger ? undefined : "border-border border-t pt-3"}>
       <Button
         size="sm"
         variant="secondary"
@@ -189,21 +193,21 @@ function AiExplanationState({
             {result.value.provider === "mock" ? "development mock" : result.value.model}
           </p>
           <section>
-            <p className="font-semibold">Verified fact</p>
+            <p className="font-semibold">Verified data</p>
             <p className="text-muted-foreground mt-1 text-sm">{result.value.verifiedFact}</p>
           </section>
           <section>
-            <p className="font-semibold">AI interpretation</p>
+            <p className="font-semibold">What it may mean</p>
             <p className="text-muted-foreground mt-1 text-sm">{result.value.interpretation}</p>
           </section>
           <section>
-            <p className="font-semibold">Suggested action</p>
+            <p className="font-semibold">What to check next</p>
             <p className="text-muted-foreground mt-1 text-sm">
               {result.value.recommendedActions[0]?.action}
             </p>
           </section>
           <section>
-            <p className="font-semibold">Questions to investigate</p>
+            <p className="font-semibold">Questions worth asking</p>
             <ul className="text-muted-foreground mt-1 list-disc space-y-1 pl-5 text-sm">
               {result.value.questionsToInvestigate.map((question) => (
                 <li key={question}>{question}</li>
@@ -211,7 +215,7 @@ function AiExplanationState({
             </ul>
           </section>
           <section>
-            <p className="font-semibold">Evidence references</p>
+            <p className="font-semibold">How we know</p>
             <p className="text-muted-foreground mt-1 text-sm">
               {result.value.evidenceReferences.join(", ")}
             </p>

@@ -1,6 +1,6 @@
 # InsightAI Design System
 
-**Status:** Phase 4 dashboard implementation baseline
+**Status:** Phase 8 founder experience dark-system baseline
 
 ## Experience principles
 
@@ -21,40 +21,41 @@ copying another product's composition or visual identity.
 
 ## Color tokens
 
-The Phase 1 shell implements a light theme in `src/app/globals.css`. Semantic names are the stable
-contract; components consume Tailwind utilities backed by these CSS variables rather than duplicating
-literal values.
+Phase 8 uses a deliberate deep-charcoal system in `src/app/globals.css`. Semantic names are the
+stable contract; components consume Tailwind utilities backed by these CSS variables rather than
+duplicating literal values. This is a single high-contrast system, not a partial dark-mode inversion.
 
 ### Core surfaces and text
 
 | Token              | Initial value | Use                                                               |
 | ------------------ | ------------- | ----------------------------------------------------------------- |
-| `background`       | `#F6F7FA`     | Application canvas                                                |
-| `surface`          | `#FFFFFF`     | Cards, popovers, panels                                           |
-| `surface-elevated` | `#FFFFFF`     | Layered menus and overlays                                        |
-| `surface-subtle`   | `#F0F2F6`     | Secondary regions and hover fills                                 |
-| `foreground`       | `#172033`     | Primary text                                                      |
-| `muted-foreground` | `#62708A`     | Secondary text; not for tiny low-contrast labels without checking |
-| `border`           | `#DFE4EC`     | Default dividers and outlines                                     |
-| `border-strong`    | `#C8D0DD`     | Emphasized boundaries                                             |
+| `background`       | `#0B0F16`     | Application canvas                                                |
+| `surface`          | `#121924`     | Cards, popovers, panels                                           |
+| `surface-elevated` | `#192232`     | Layered menus and overlays                                        |
+| `surface-subtle`   | `#0F1621`     | Secondary regions and hover fills                                 |
+| `foreground`       | `#F4F7FB`     | Primary text                                                      |
+| `muted-foreground` | `#A7B2C4`     | Secondary text; not for tiny low-contrast labels without checking |
+| `border`           | `#2A3548`     | Default dividers and outlines                                     |
+| `border-strong`    | `#43516A`     | Emphasized boundaries                                             |
 
 ### Brand and semantic states
 
 | Token           | Initial value | Use                                                 |
 | --------------- | ------------- | --------------------------------------------------- |
-| `primary`       | `#5454C7`     | Brand accent, selected state, primary action        |
-| `primary-hover` | `#4646AA`     | Hover/active action                                 |
-| `primary-soft`  | `#EDEDFF`     | Selected background and subtle emphasis             |
-| `success`       | `#16875D`     | Confirmed success/positive status                   |
-| `warning`       | `#A15C00`     | Caution and data-quality warning                    |
-| `destructive`   | `#C23A43`     | Error, destructive action, verified negative status |
-| `info`          | `#2563A8`     | Neutral informational state                         |
+| `primary`       | `#9095FF`     | Brand accent, selected state, primary action        |
+| `primary-hover` | `#B1B5FF`     | Hover/active action                                 |
+| `primary-soft`  | `#202443`     | Selected background and subtle emphasis             |
+| `success`       | `#42C88D`     | Confirmed success/positive status                   |
+| `warning`       | `#F0B45B`     | Caution and data-quality warning                    |
+| `destructive`   | `#F1777F`     | Error, destructive action, verified negative status |
+| `info`          | `#6EA8FF`     | Neutral informational state                         |
 
 Color is never the only carrier of status. Pair it with text, an icon, shape, or pattern. Positive and
 negative chart colors describe direction only when direction is semantically good/bad; revenue decline
 may be negative, while cost decline may be positive.
 
-Dark theme is a future enhancement, not a Phase 1 requirement. Do not create a partly supported theme.
+Semantic status is never carried by color alone. Text labels, icons, and accessible names remain
+required, especially in compact cards and charts.
 
 ## Typography
 

@@ -49,8 +49,14 @@ describe("UploadWorkflow readiness", () => {
     const onComplete = vi.fn();
     render(<UploadWorkflow onComplete={onComplete} onCancel={vi.fn()} />);
 
-    expect(screen.getByText(/raw file and rows stay in this browser session/i)).toBeInTheDocument();
-    expect(screen.getByText(/minimized summary—not your raw file or rows/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/raw file and sales rows stay in this browser session/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /small, reviewed summary needed for that explanation—not your raw file or rows/i,
+      ),
+    ).toBeInTheDocument();
 
     await user.upload(uploadInput(), new File([`${headers}\n${validRows}`], "orders.csv"));
     await moveToReconciliation(user);
@@ -60,7 +66,7 @@ describe("UploadWorkflow readiness", () => {
     expect(screen.getByRole("button", { name: "Continue" })).toBeEnabled();
 
     await user.click(screen.getByRole("button", { name: "Continue" }));
-    const openDashboard = screen.getByRole("button", { name: "Open uploaded dashboard" });
+    const openDashboard = screen.getByRole("button", { name: "See my business insights" });
     expect(openDashboard).toBeEnabled();
     await user.click(openDashboard);
     expect(onComplete).toHaveBeenCalledTimes(1);
@@ -76,12 +82,10 @@ describe("UploadWorkflow readiness", () => {
 
     expect(screen.getByText("More information is needed before analysis")).toBeInTheDocument();
     expect(screen.queryByText("Ready to analyze")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Return to Transform" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Return to Prepare data" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Continue" })).toBeDisabled();
 
-    await user.click(screen.getByRole("button", { name: "Return to Transform" }));
-    expect(
-      screen.getByRole("heading", { name: "Configure explicit transformations" }),
-    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Return to Prepare data" }));
+    expect(screen.getByRole("heading", { name: "Prepare your data" })).toBeInTheDocument();
   });
 });

@@ -26,7 +26,7 @@ export function Sidebar() {
         <ul className="space-y-1">
           {primaryNavigation.map((item) => (
             <li key={item.id}>
-              <SidebarItem item={item} active={item.id === "overview"} />
+              <SidebarItem item={item} active={item.id === "home"} />
             </li>
           ))}
         </ul>
@@ -37,12 +37,12 @@ export function Sidebar() {
           <div className="flex items-center justify-between gap-2">
             <span className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <DatabaseZap aria-hidden="true" className="size-3.5" />
-              Demo workspace
+              Your workspace
             </span>
-            <Badge variant="neutral">Demo data</Badge>
+            <Badge variant="neutral">Sample data</Badge>
           </div>
           <p className="text-muted-foreground mt-2 text-[0.6875rem] leading-4.5">
-            Sample commerce data for exploring the dashboard.
+            Start with the sample or upload a sales CSV when you are ready.
           </p>
         </div>
       </div>

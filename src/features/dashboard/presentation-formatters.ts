@@ -106,6 +106,18 @@ export function formatDateInterval(interval: DateInterval): string {
   return start === end ? start : `${start} – ${end}`;
 }
 
+/** A compact, non-technical period label for the Founder Home. */
+export function formatFounderDateRange(startDate: string, endDate: string): string {
+  const display = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const start = display.format(new Date(`${startDate}T00:00:00Z`));
+  const end = display.format(new Date(`${endDate}T00:00:00Z`));
+  return start === end ? start : `${start} – ${end}`;
+}
+
 export function formatNonComputable(value: NonComputableValue | null): string | null {
   return value === null ? null : value.message;
 }

@@ -110,7 +110,7 @@ export function MobileNavigation() {
                 <li key={item.id}>
                   <SidebarItem
                     item={item}
-                    active={item.id === "overview"}
+                    active={item.id === "home"}
                     onNavigate={() => setOpen(false)}
                   />
                 </li>
@@ -118,7 +118,7 @@ export function MobileNavigation() {
             </ul>
           </nav>
           <div className="border-border border-t p-4">
-            <Badge variant="neutral">Demo data</Badge>
+            <Badge variant="neutral">Sample data</Badge>
           </div>
         </div>
       </div>

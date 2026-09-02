@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CircleDollarSign,
   Gauge,
@@ -23,6 +23,7 @@ import { BreakdownChart, RevenueTrendChart } from "@/features/dashboard/dashboar
 import { EvidenceDrawer, type EvidenceSelection } from "@/features/dashboard/evidence-drawer";
 import { FindingDetailsDrawer } from "@/features/dashboard/finding-details-drawer";
 import { FindingsPanel } from "@/features/dashboard/findings-panel";
+import { FounderHome } from "@/features/dashboard/founder-home";
 import { KpiCard } from "@/features/dashboard/kpi-card";
 import { ProductPerformanceTable } from "@/features/dashboard/product-performance-table";
 import { SampleDataBanner } from "@/features/dashboard/sample-data-banner";
@@ -34,6 +35,47 @@ import {
   useDashboardFilters,
 } from "@/features/dashboard/dashboard-filter-state";
 import type { DashboardFilterOptions } from "@/features/dashboard/analytics-adapter";
+
+type WorkspaceExperience = "founder" | "advanced";
+
+function readWorkspaceExperience(): WorkspaceExperience {
+  if (typeof window === "undefined") return "founder";
+  return new URLSearchParams(window.location.search).get("view") === "advanced"
+    ? "advanced"
+    : "founder";
+}
+
+function ExperienceSwitch({
+  experience,
+  onChange,
+}: {
+  readonly experience: WorkspaceExperience;
+  readonly onChange: (experience: WorkspaceExperience) => void;
+}) {
+  return (
+    <nav
+      aria-label="Workspace experience"
+      className="border-border bg-surface/85 mx-auto flex max-w-[100rem] gap-1 border-b px-4 py-2 sm:px-6 lg:px-8"
+    >
+      <Button
+        aria-pressed={experience === "founder"}
+        size="sm"
+        variant={experience === "founder" ? "secondary" : "ghost"}
+        onClick={() => onChange("founder")}
+      >
+        Home
+      </Button>
+      <Button
+        aria-pressed={experience === "advanced"}
+        size="sm"
+        variant={experience === "advanced" ? "secondary" : "ghost"}
+        onClick={() => onChange("advanced")}
+      >
+        Explore
+      </Button>
+    </nav>
+  );
+}
 
 const primaryKpiPresentation = {
   total_revenue: {
@@ -145,6 +187,7 @@ function DashboardContent({
   onReset,
   onUpdateFilters,
   onClearUploaded,
+  onOpenFounder,
   onOpenUpload,
   onUseDemo,
   options,
@@ -161,6 +204,7 @@ function DashboardContent({
   readonly onReset: () => void;
   readonly onUpdateFilters: (update: Partial<DashboardFilterState>) => void;
   readonly onClearUploaded: () => void;
+  readonly onOpenFounder: () => void;
   readonly onOpenUpload: () => void;
   readonly onUseDemo: () => void;
   readonly options: DashboardFilterOptions;
@@ -171,6 +215,10 @@ function DashboardContent({
   return (
     <>
       <SiteHeader />
+      <ExperienceSwitch
+        experience="advanced"
+        onChange={(experience) => experience === "founder" && onOpenFounder()}
+      />
       <div
         className="mx-auto max-w-[100rem] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7"
         data-dashboard-calculation-ms={viewModel.calculatedInMs}
@@ -354,6 +402,27 @@ function DashboardWorkspace() {
   const analytics = useDashboardAnalytics(filters, uploadedDataset?.dataset ?? null);
   const [evidenceSelection, setEvidenceSelection] = useState<EvidenceSelection | null>(null);
   const [findingSelection, setFindingSelection] = useState<Finding | null>(null);
+  const [experience, setExperience] = useState<WorkspaceExperience>("founder");
+
+  useEffect(() => {
+    const syncExperience = () => setExperience(readWorkspaceExperience());
+    syncExperience();
+    window.addEventListener("popstate", syncExperience);
+    return () => window.removeEventListener("popstate", syncExperience);
+  }, []);
+
+  const changeExperience = useCallback((next: WorkspaceExperience) => {
+    const query = new URLSearchParams(window.location.search);
+    if (next === "advanced") query.set("view", "advanced");
+    else query.delete("view");
+    const search = query.toString();
+    window.history.pushState(
+      null,
+      "",
+      `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`,
+    );
+    setExperience(next);
+  }, []);
 
   const openUpload = useCallback(() => setUploadOpen(true), []);
   const useDemo = useCallback(() => {
@@ -378,6 +447,7 @@ function DashboardWorkspace() {
       });
       setEvidenceSelection(null);
       setFindingSelection(null);
+      changeExperience("founder");
       replaceFilters({
         preset: "custom",
         start: dataset.metadata.dateRange.start,
@@ -389,7 +459,19 @@ function DashboardWorkspace() {
       });
       setUploadOpen(false);
     },
-    [replaceFilters],
+    [changeExperience, replaceFilters],
+  );
+
+  const exploreFinding = useCallback(
+    (finding: Finding) => {
+      const segment = finding.affectedSegment;
+      if (segment && finding.affectedDimension === "category") updateFilters({ category: segment });
+      if (segment && finding.affectedDimension === "region") updateFilters({ region: segment });
+      if (segment && finding.affectedDimension === "channel") updateFilters({ channel: segment });
+      if (segment && finding.affectedDimension === "product") updateFilters({ productId: segment });
+      changeExperience("advanced");
+    },
+    [changeExperience, updateFilters],
   );
 
   if (uploadOpen) {
@@ -419,25 +501,58 @@ function DashboardWorkspace() {
 
   return (
     <>
-      <DashboardContent
-        activeFilterChips={analytics.value.activeFilterChips}
-        choosePreset={choosePreset}
-        filters={filters}
-        isPending={isPending}
-        viewModel={analytics.value}
-        onInspectEvidence={setEvidenceSelection}
-        onInspectFinding={setFindingSelection}
-        onReset={resetFilters}
-        onUpdateFilters={updateFilters}
-        onOpenUpload={openUpload}
-        onUseDemo={useDemo}
-        onClearUploaded={clearUploaded}
-        uploadedFilename={uploadedDataset?.filename ?? null}
-        aiDatasetFingerprint={
-          uploadedDataset?.aiDatasetFingerprint ?? analytics.value.datasetVersion
-        }
-        options={analytics.value.filterOptions}
-      />
+      {experience === "founder" ? (
+        <>
+          <ExperienceSwitch experience="founder" onChange={changeExperience} />
+          <div className="mx-auto max-w-6xl px-4 pt-5 sm:px-6 lg:px-8">
+            <SampleDataBanner
+              datasetVersion={analytics.value.datasetVersion}
+              rowCount={analytics.value.rowCount}
+              timezone={analytics.value.timezone}
+              source={uploadedDataset ? "uploaded" : "demo"}
+              filename={uploadedDataset?.filename ?? null}
+            />
+          </div>
+          <FounderHome
+            activeFilterChips={analytics.value.activeFilterChips}
+            aiDatasetFingerprint={
+              uploadedDataset?.aiDatasetFingerprint ?? analytics.value.datasetVersion
+            }
+            viewModel={analytics.value}
+            uploadedDataset={Boolean(uploadedDataset)}
+            uploadedFilename={uploadedDataset?.filename ?? null}
+            onClearFilters={resetFilters}
+            onOpenAdvanced={() => changeExperience("advanced")}
+            onOpenUpload={openUpload}
+            onInspectFinding={setFindingSelection}
+            onInspectMetric={(metric) =>
+              setEvidenceSelection(metricSelection(metric, analytics.value.filterContextLabel))
+            }
+            onExploreFinding={exploreFinding}
+          />
+        </>
+      ) : (
+        <DashboardContent
+          activeFilterChips={analytics.value.activeFilterChips}
+          choosePreset={choosePreset}
+          filters={filters}
+          isPending={isPending}
+          viewModel={analytics.value}
+          onInspectEvidence={setEvidenceSelection}
+          onInspectFinding={setFindingSelection}
+          onReset={resetFilters}
+          onUpdateFilters={updateFilters}
+          onOpenUpload={openUpload}
+          onUseDemo={useDemo}
+          onClearUploaded={clearUploaded}
+          onOpenFounder={() => changeExperience("founder")}
+          uploadedFilename={uploadedDataset?.filename ?? null}
+          aiDatasetFingerprint={
+            uploadedDataset?.aiDatasetFingerprint ?? analytics.value.datasetVersion
+          }
+          options={analytics.value.filterOptions}
+        />
+      )}
       <EvidenceDrawer selection={evidenceSelection} onClose={() => setEvidenceSelection(null)} />
       <FindingDetailsDrawer finding={findingSelection} onClose={() => setFindingSelection(null)} />
     </>

@@ -1,6 +1,7 @@
 # InsightAI Architecture
 
-**Status:** Phase 3 deterministic-analytics implementation
+**Status:** Phase 8 founder-first dashboard layered over the approved analytics, findings, ingestion,
+and grounded-AI boundaries
 **Architecture style:** modular Next.js application with a framework-independent analytics core
 
 ## Goals and constraints
@@ -51,7 +52,7 @@ User
   -> canonical validation and normalization
   -> deterministic analytics core
   -> typed metrics, comparisons, breakdowns, quality state, and evidence IDs
-  -> dashboard and rule-based findings
+  -> founder home or advanced dashboard and rule-based findings
   -> bounded AI explanation/chat adapter (Phase 7+, optional)
 
 Future persistence:
@@ -60,6 +61,24 @@ Future persistence:
 
 The UI may request calculations but cannot define them. The AI adapter may explain calculation
 outputs but cannot modify or replace them.
+
+## Phase 8 founder/advanced presentation boundary
+
+`src/features/dashboard/founder-home.tsx` is a view over `DashboardViewModel` and typed findings;
+it contains no analytical formulas or control totals. Founder Home is the default experience and
+uses a short business snapshot plus plain-language insights. `OverviewDashboard` keeps Explore as
+the advanced workspace, including the existing shared filter bar, charts, breakdowns, table,
+evidence drawer, and finding details.
+
+Both experiences receive the same dataset and filter state. The optional `view=advanced` URL
+parameter controls presentation only; the dashboard filter state preserves it while it writes the
+canonical filter query. A founder action can set a supported affected segment in that same filter
+context before switching to Explore. This is navigation, not a second calculation path.
+
+Founder guidance shortcuts route to already calculated findings. They are deliberately not AI chat.
+The Phase 7 `AiExplanation` component remains the sole path for optional model interpretation and
+continues to enforce minimized evidence, uploaded-data consent, server-only provider calls, and
+post-generation validation.
 
 ## Phase 3 analytics boundaries
 

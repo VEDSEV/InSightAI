@@ -6,14 +6,18 @@ import { MobileNavigation } from "@/components/layout/mobile-navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 
 describe("application navigation", () => {
-  it("marks Overview as current and identifies future sections as unavailable", () => {
+  it("starts with founder-friendly navigation and keeps Explore available", () => {
     render(<Sidebar />);
 
     const primaryNavigation = screen.getByRole("navigation", { name: "Primary" });
     expect(primaryNavigation).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByText("Sales").closest("[aria-disabled='true']")).toBeInTheDocument();
-    expect(screen.getAllByText("Soon")).toHaveLength(6);
+    expect(screen.getByRole("link", { name: "Home" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "Insights" })).toHaveAttribute("href", "/#insights");
+    expect(screen.getByRole("link", { name: "Explore" })).toHaveAttribute(
+      "href",
+      "/?view=advanced",
+    );
+    expect(screen.queryByText("Soon")).not.toBeInTheDocument();
   });
 
   it("opens, closes with Escape, and returns focus in the mobile menu", async () => {

@@ -121,7 +121,11 @@ type FilterUpdate =
   Partial<DashboardFilterState> | ((current: DashboardFilterState) => DashboardFilterState);
 
 function writeSearch(state: DashboardFilterState): void {
-  const next = `${window.location.pathname}${dashboardFilterSearch(state)}${window.location.hash}`;
+  const query = new URLSearchParams(dashboardFilterSearch(state));
+  const workspaceView = new URLSearchParams(window.location.search).get("view");
+  if (workspaceView === "advanced") query.set("view", workspaceView);
+  const search = query.toString();
+  const next = `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`;
   window.history.replaceState(null, "", next);
 }
 

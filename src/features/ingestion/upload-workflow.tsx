@@ -34,6 +34,24 @@ const STEPS = [
 ] as const;
 type Step = (typeof STEPS)[number];
 
+const FOUNDER_STEP_LABEL: Readonly<Record<Step, string>> = Object.freeze({
+  "Choose data": "Upload file",
+  "Preview file": "Check file",
+  "Map columns": "Match columns",
+  "Review quality": "Data check",
+  Transform: "Prepare data",
+  Reconcile: "Check totals",
+  "Open dashboard": "View insights",
+});
+
+const FOUNDER_PROGRESS: readonly { readonly label: string; readonly steps: readonly Step[] }[] =
+  Object.freeze([
+    { label: "Upload file", steps: ["Choose data", "Preview file"] },
+    { label: "Check your data", steps: ["Map columns", "Review quality", "Transform"] },
+    { label: "Review your totals", steps: ["Reconcile"] },
+    { label: "See your insights", steps: ["Open dashboard"] },
+  ]);
+
 function formatBytes(bytes: number) {
   return `${(bytes / 1024).toFixed(bytes < 1024 * 1024 ? 0 : 1)} KB`;
 }
@@ -113,17 +131,17 @@ function IssueList({ issues }: { readonly issues: readonly UploadIssue[] }) {
 }
 
 function Stepper({ step }: { readonly step: Step }) {
-  const index = STEPS.indexOf(step);
+  const index = FOUNDER_PROGRESS.findIndex((item) => item.steps.includes(step));
   return (
-    <ol aria-label="Upload progress" className="grid gap-2 sm:grid-cols-4 lg:grid-cols-7">
-      {STEPS.map((item, itemIndex) => (
+    <ol aria-label="Upload progress" className="grid gap-2 sm:grid-cols-4">
+      {FOUNDER_PROGRESS.map((item, itemIndex) => (
         <li
-          key={item}
+          key={item.label}
           className={`rounded-md px-2 py-2 text-xs font-medium ${itemIndex === index ? "bg-primary text-primary-foreground" : itemIndex < index ? "bg-success-subtle text-success-strong" : "bg-surface-subtle text-muted-foreground"}`}
           aria-current={itemIndex === index ? "step" : undefined}
         >
           <span className="mr-1">{itemIndex < index ? "✓" : itemIndex + 1}.</span>
-          {item}
+          {item.label}
         </li>
       ))}
     </ol>
@@ -266,12 +284,14 @@ export function UploadWorkflow({
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-primary text-sm font-semibold">Session-only data import</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em]">Analyze your data</h1>
+          <p className="text-primary text-sm font-semibold">Your data, in this browser session</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-[-0.035em]">
+            Bring your sales data to life
+          </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl text-sm leading-6">
-            Your raw file and rows stay in this browser session. If you choose Explain with AI and
-            confirm the privacy review, InsightAI may send only a minimized summary—not your raw
-            file or rows—to the configured AI provider.
+            Your raw file and sales rows stay in this browser session. AI is optional: if you ask
+            for an explanation and approve the privacy review, InsightAI may send only the small,
+            reviewed summary needed for that explanation—not your raw file or rows.
           </p>
         </div>
         <Button variant="ghost" onClick={onCancel}>
@@ -291,17 +311,20 @@ export function UploadWorkflow({
             className="border-border flex min-h-64 flex-col items-center justify-center rounded-card border border-dashed p-6 text-center"
           >
             <FileUp aria-hidden="true" className="text-primary size-10" />
-            <h2 className="mt-4 text-lg font-semibold">Drop a CSV here or choose a file</h2>
+            <h2 className="mt-4 text-lg font-semibold">
+              Drop your sales CSV here or choose a file
+            </h2>
             <p className="text-muted-foreground mt-2 max-w-md text-sm">
               UTF-8 CSV only, up to {UPLOAD_LIMITS.maxBytes / 1024 / 1024} MB and{" "}
-              {UPLOAD_LIMITS.maxRows.toLocaleString()} rows. No rows are uploaded or stored
-              externally.
+              {UPLOAD_LIMITS.maxRows.toLocaleString()} rows. Your file is not stored by InsightAI.
             </p>
             <input
               ref={inputRef}
               className="sr-only"
               type="file"
               accept=".csv,text/csv"
+              aria-hidden="true"
+              tabIndex={-1}
               onChange={(event) => void chooseFile(event.target.files?.[0])}
             />
             <Button className="mt-5" onClick={() => inputRef.current?.click()}>
@@ -340,10 +363,10 @@ export function UploadWorkflow({
       {parsed && step === "Map columns" ? (
         <Card className="p-5">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold">Map source columns</h2>
+            <h2 className="text-lg font-semibold">Match your columns</h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              Suggestions use normalized headers, known aliases, and inferred-type compatibility.
-              Every mapping is editable.
+              We matched the columns we recognize. Review only anything that looks wrong; every
+              match is editable.
             </p>
           </div>
           <div className="space-y-3">
@@ -415,10 +438,10 @@ export function UploadWorkflow({
         <Card className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold">Data quality review</h2>
+              <h2 className="text-lg font-semibold">Data check</h2>
               <p className="text-muted-foreground mt-1 text-sm">
-                Blocking errors cannot enter analytics. Warnings remain visible and do not invent
-                values.
+                We stop only for issues that would make your results unreliable. Warnings remain
+                visible and never add or guess values.
               </p>
             </div>
             <div className="flex gap-2">
@@ -451,7 +474,7 @@ export function UploadWorkflow({
       {parsed && preparation && step === "Transform" ? (
         <Card className="space-y-5 p-5">
           <div>
-            <h2 className="text-lg font-semibold">Configure explicit transformations</h2>
+            <h2 className="text-lg font-semibold">Prepare your data</h2>
             <p className="text-muted-foreground mt-1 text-sm">
               Original values remain available in the review. Nothing is silently imputed or
               deleted.
@@ -528,16 +551,15 @@ export function UploadWorkflow({
       {parsed && preparation && step === "Reconcile" ? (
         <Card className="space-y-5 p-5">
           <div>
-            <h2 className="text-lg font-semibold">Reconciliation report</h2>
+            <h2 className="text-lg font-semibold">Check your totals</h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              This explains what InsightAI would analyze after explicit transformations and any
-              approved exclusions.
+              Review what InsightAI will analyze after the choices you made above.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {[
               ["Source rows", preparation.reconciliation.sourceRowCount],
-              ["Canonical order lines", preparation.reconciliation.canonicalOrderLines],
+              ["Analyzed sales rows", preparation.reconciliation.canonicalOrderLines],
               ["Distinct orders", preparation.reconciliation.distinctOrders],
               ["Customers", preparation.reconciliation.distinctCustomers],
               [
@@ -592,7 +614,7 @@ export function UploadWorkflow({
                     variant="secondary"
                     onClick={() => setStep(readinessReturnStep)}
                   >
-                    Return to {readinessReturnStep}
+                    Return to {FOUNDER_STEP_LABEL[readinessReturnStep]}
                   </Button>
                 ) : null}
               </div>
@@ -618,7 +640,7 @@ export function UploadWorkflow({
             disabled={!isReadyToAnalyze || !preparation.dataset}
             onClick={() => preparation.dataset && onComplete(preparation.dataset, parsed.filename)}
           >
-            Open uploaded dashboard
+            See my business insights
             <ArrowRight aria-hidden="true" className="size-4" />
           </Button>
         </Card>
@@ -631,7 +653,7 @@ export function UploadWorkflow({
           </Button>
           {step === "Open dashboard" ? (
             <Button variant="ghost" onClick={() => setStep("Reconcile")}>
-              Review reconciliation
+              Review data check
             </Button>
           ) : (
             <Button

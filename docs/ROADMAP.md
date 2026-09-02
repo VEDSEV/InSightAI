@@ -134,7 +134,7 @@ Phase 5 is the active implementation scope.
 ## Phase 5 — Data upload, validation, cleaning, and column mapping
 
 **Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
-Phase 7 is the active implementation scope.
+Phase 8 founder experience foundations are the active implementation scope.
 
 **Goal:** let a user safely transform a familiar export into the canonical schema.
 
@@ -177,7 +177,7 @@ policy; it does not reimplement the underlying calculations.
 
 ## Phase 7 — AI explanations and evidence-based recommendations
 
-**Status:** Complete and approved on `feat/phase-7-grounded-ai`; not yet merged into `master`.
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
 
 **Goal:** add useful narrative while retaining deterministic facts and visible uncertainty.
 
@@ -195,7 +195,30 @@ policy; it does not reimplement the underlying calculations.
 - Users can inspect supporting evidence and see that content is AI-generated.
 - No customer data is sent to a model without documented consent, retention, and provider settings.
 
-## Phase 8 — AI chat grounded in calculated metrics
+## Phase 8 — Founder experience foundations
+
+**Goal:** make the trusted analytics already in InsightAI understandable and useful to a small-business
+owner without removing the advanced analytical workspace.
+
+**Deliverables**
+
+- Founder Home as the default experience: a small business snapshot, prioritized plain-language
+  insights, useful next steps, and clear routes to upload or explore deeper.
+- Progressive disclosure: an unchanged calculation boundary and advanced workspace remain available
+  through Explore, while filters, methodology, and detailed tables stay out of the first view.
+- Clearer product language such as Insights, Data check, How we know, and Analyzed sales rows.
+- A deliberate accessible dark design system with restrained semantic color and reduced-motion support.
+- Suggested grounded guidance shortcuts that route to existing deterministic findings; no chat is
+  introduced in this phase.
+
+**Acceptance criteria**
+
+- Founder Home never duplicates formulas or bypasses the public analytics/finding boundaries.
+- A new user can find a starting action, understand the current data source, and open advanced detail.
+- Advanced analytics, data checks, provenance, filters, and all existing protections remain available.
+- Default and advanced views reconcile to the same active dataset and filter context.
+
+## Phase 9 — AI chat grounded in calculated metrics
 
 **Goal:** support follow-up questions within the available analytical evidence.
 
@@ -212,7 +235,7 @@ policy; it does not reimplement the underlying calculations.
 - Each answer displays period/filter context and distinguishes data from inference.
 - Cost, latency, privacy, and failure behavior meet documented service targets.
 
-## Phase 9 — Authentication, saved projects, and storage
+## Phase 10 — Authentication, saved projects, and storage
 
 **Goal:** make user data durable and isolated using Supabase if it remains the best fit.
 
@@ -229,7 +252,7 @@ policy; it does not reimplement the underlying calculations.
 - Data retention and deletion are documented and tested.
 - Migrations are reproducible and a backup/restore exercise succeeds.
 
-## Phase 10 — Executive report export, testing, deployment, documentation, and portfolio polish
+## Phase 11 — Executive report export, testing, deployment, documentation, and portfolio polish
 
 **Goal:** ship a credible, demonstrable product with an honest case study.
 

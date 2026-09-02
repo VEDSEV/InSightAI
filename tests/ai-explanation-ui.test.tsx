@@ -174,11 +174,11 @@ describe("AiExplanation", () => {
     expect(
       await screen.findByText(/AI-generated explanation.*development mock/i),
     ).toBeInTheDocument();
-    expect(screen.getByText("Verified fact")).toBeInTheDocument();
-    expect(screen.getByText("AI interpretation")).toBeInTheDocument();
-    expect(screen.getByText("Suggested action")).toBeInTheDocument();
-    expect(screen.getByText("Questions to investigate")).toBeInTheDocument();
-    expect(screen.getByText("Evidence references")).toBeInTheDocument();
+    expect(screen.getByText("Verified data")).toBeInTheDocument();
+    expect(screen.getByText("What it may mean")).toBeInTheDocument();
+    expect(screen.getByText("What to check next")).toBeInTheDocument();
+    expect(screen.getByText("Questions worth asking")).toBeInTheDocument();
+    expect(screen.getByText("How we know")).toBeInTheDocument();
     expect(screen.getByText("Limitations")).toBeInTheDocument();
     expect(screen.queryByText("LINE-PRIVATE")).not.toBeInTheDocument();
   });

@@ -13,6 +13,7 @@ import {
   formatCount,
   formatCurrencyCents,
   formatDateInterval,
+  formatFounderDateRange,
   formatMetricValue,
   formatRate,
 } from "@/features/dashboard/presentation-formatters";
@@ -31,6 +32,7 @@ describe("dashboard presentation formatters", () => {
     expect(formatDateInterval(dateInterval(isoDate("2024-01-01"), isoDate("2025-12-31")))).toBe(
       "Jan 1, 2024 – Dec 31, 2025",
     );
+    expect(formatFounderDateRange("2024-01-01", "2025-12-31")).toBe("Jan 2024 – Dec 2025");
   });
 
   it("formats a percentage-point margin comparison distinctly from relative growth", () => {

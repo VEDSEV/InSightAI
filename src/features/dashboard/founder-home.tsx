@@ -2,23 +2,24 @@
 
 import {
   ArrowRight,
-  BrainCircuit,
   ChartNoAxesCombined,
   CircleDollarSign,
   FileSearch,
   type LucideIcon,
   PackageCheck,
-  Sparkles,
   UsersRound,
 } from "lucide-react";
 
 import type { Finding } from "@/findings";
 
 import { AiExplanation } from "@/features/dashboard/ai-explanation";
+import { GuidedAiAnalyst } from "@/features/ai-analyst/guided-ai-analyst";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { DashboardMetric, DashboardViewModel } from "@/features/dashboard/analytics-adapter";
+import type { EvidenceSelection } from "@/features/dashboard/evidence-drawer";
+import type { AnalystDimension } from "@/features/ai-analyst/types";
 import {
   formatComparison,
   formatFounderDateRange,
@@ -30,7 +31,9 @@ type FounderHomeProps = Readonly<{
   activeFilterChips: readonly string[];
   aiDatasetFingerprint: string;
   onClearFilters: () => void;
+  onExploreAnalyst: (dimension: AnalystDimension, value: string) => void;
   onExploreFinding: (finding: Finding) => void;
+  onInspectAnalystEvidence: (selection: EvidenceSelection) => void;
   onInspectFinding: (finding: Finding) => void;
   onInspectMetric: (metric: DashboardMetric) => void;
   onOpenAdvanced: () => void;
@@ -206,7 +209,9 @@ export function FounderHome({
   activeFilterChips,
   aiDatasetFingerprint,
   onClearFilters,
+  onExploreAnalyst,
   onExploreFinding,
+  onInspectAnalystEvidence,
   onInspectFinding,
   onInspectMetric,
   onOpenAdvanced,
@@ -216,7 +221,6 @@ export function FounderHome({
   viewModel,
 }: FounderHomeProps) {
   const insights = viewModel.findings.findings.slice(0, 3);
-  const topInsight = insights[0];
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
       <section className="relative overflow-hidden rounded-[1.35rem] border border-border bg-surface p-5 shadow-card sm:p-7">
@@ -289,49 +293,12 @@ export function FounderHome({
         </div>
       </section>
 
-      <section
-        aria-labelledby="ask-insightai-title"
-        className="rounded-[1.25rem] border border-primary/30 bg-primary-soft/45 p-5 sm:p-7"
-      >
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
-          <div className="max-w-xl">
-            <div className="flex items-center gap-2 text-primary">
-              <BrainCircuit aria-hidden="true" className="size-5" />
-              <p className="text-sm font-semibold">InsightAI assistance</p>
-            </div>
-            <h2 id="ask-insightai-title" className="mt-2 text-2xl font-semibold tracking-[-0.03em]">
-              Explore your business with InsightAI
-            </h2>
-            <p className="text-muted-foreground mt-2 text-sm leading-6">
-              Start with a verified question based on the insights and metrics already calculated
-              for this view.
-            </p>
-            <p className="text-muted-foreground mt-2 text-xs leading-5">
-              These guided prompts open the relevant analysis; conversational questions are coming
-              later.
-            </p>
-          </div>
-          <Sparkles aria-hidden="true" className="text-primary size-8" />
-        </div>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {[
-            "What should I investigate first?",
-            "Which sales channel is strongest?",
-            "Where are margins weakest?",
-            "What changed in this period?",
-          ].map((question) => (
-            <Button
-              key={question}
-              size="sm"
-              variant="secondary"
-              disabled={!topInsight}
-              onClick={() => topInsight && onInspectFinding(topInsight)}
-            >
-              {question}
-            </Button>
-          ))}
-        </div>
-      </section>
+      <GuidedAiAnalyst
+        datasetFingerprint={aiDatasetFingerprint}
+        viewModel={viewModel}
+        onExplore={onExploreAnalyst}
+        onInspectEvidence={onInspectAnalystEvidence}
+      />
 
       <section id="insights" aria-labelledby="insights-title">
         <div className="flex flex-wrap items-end justify-between gap-3">

@@ -1,5 +1,13 @@
 # Grounded AI explanation engine
 
+## Relationship to the Guided AI Analyst
+
+Phase 9’s Guided AI Analyst does not replace this provider-backed explanation flow. It classifies
+supported business questions locally, runs a deterministic analysis plan, and renders a verified
+template answer from the existing analytics/finding outputs. No raw rows, identifiers, or founder
+question text are transmitted for that local routing flow. Optional per-finding explanations continue
+to use the privacy and consent model documented below.
+
 Phase 7 treats AI as an optional, server-only communication layer. Deterministic analytics and
 findings remain authoritative. The browser sends a minimized evidence packet: finding metadata,
 period/filter context, aggregate support counts, and evidence IDs only. Raw CSV, source order IDs,

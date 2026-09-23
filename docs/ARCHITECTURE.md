@@ -1,7 +1,7 @@
 # InsightAI Architecture
 
-**Status:** Phase 8 founder-first dashboard layered over the approved analytics, findings, ingestion,
-and grounded-AI boundaries
+**Status:** Phase 9 guided analyst layered over the approved analytics, findings, ingestion, and
+grounded-AI boundaries
 **Architecture style:** modular Next.js application with a framework-independent analytics core
 
 ## Goals and constraints
@@ -75,10 +75,15 @@ parameter controls presentation only; the dashboard filter state preserves it wh
 canonical filter query. A founder action can set a supported affected segment in that same filter
 context before switching to Explore. This is navigation, not a second calculation path.
 
-Founder guidance shortcuts route to already calculated findings. They are deliberately not AI chat.
-The Phase 7 `AiExplanation` component remains the sole path for optional model interpretation and
-continues to enforce minimized evidence, uploaded-data consent, server-only provider calls, and
-post-generation validation.
+The Phase 9 Guided AI Analyst accepts a founder’s short question, routes it through a closed typed
+intent classifier, and executes a bounded plan over the existing engine-derived `DashboardViewModel`.
+It does not parse raw rows, duplicate analytics formulas, or send questions/data to a provider. Its
+response guard verifies active evidence, entities, displayed values, and non-causal language before
+rendering. Dataset fingerprint and normalized filter state reset its in-session follow-up context.
+
+The Phase 7 `AiExplanation` component remains the separate path for optional provider-backed
+per-finding interpretation and continues to enforce minimized evidence, uploaded-data consent,
+server-only provider calls, `store: false`, and post-generation validation.
 
 ## Phase 3 analytics boundaries
 

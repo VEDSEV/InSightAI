@@ -133,3 +133,13 @@ measurements are not universal production guarantees.
   exposes the existing shared advanced workspace.
 - **Progressive disclosure:** founder navigation, advanced-view switching, upload entry, and
   evidence/detail actions remain keyboard-operable and preserve the public analytics boundary.
+
+## Phase 9 verification groups
+
+- **Guided AI Analyst:** closed intent routing recognizes ordinary founder questions, asks for
+  clarification when needed, and rejects unsupported budgeting/forecasting requests.
+- **Plans and grounding:** every answer uses an existing dashboard metric, finding, comparison, or
+  breakdown evidence reference; unsupported numbers, entities, stale evidence, and causal claims are
+  rejected before rendering.
+- **Conversation scope:** only a bounded prior answer supports follow-up resolution; the component
+  resets its state when the normalized filter context or dataset fingerprint changes.

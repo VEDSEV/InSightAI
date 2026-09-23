@@ -7,6 +7,11 @@ Home is the default workspace. It answers three questions in order: how the busi
 deserves attention, and where to look next. It is a presentation layer over the same approved
 analytics and findings outputs used by Explore.
 
+Phase 9 adds the Guided AI Analyst to Founder Home. It accepts ordinary business questions, keeps
+the deterministic analysis boundary intact, and offers “How we know” and Explore actions for every
+substantive answer. The small in-session context clears when either the active filter context or
+dataset changes; it is not saved.
+
 ## Progressive disclosure
 
 | Founder Home                           | Explore                                                                |
@@ -32,10 +37,11 @@ inside advanced details where they support review and auditability.
 
 ## Grounded AI entry points
 
-The founder shortcuts are not chat. They take a user to an existing, filtered deterministic Insight
-and its detail. The optional **Explain with AI** control retains the Phase 7 evidence packet,
-privacy review, consent, grounding, provider, and cache-isolation behavior. It remains clearly
-labeled as AI-generated and never owns authoritative calculations.
+The Guided AI Analyst accepts a short founder question and routes it to a local, typed deterministic
+analysis plan. It remains limited to supported business questions and is not an unrestricted chatbot.
+The optional **Explain with AI** control retains the Phase 7 evidence packet, privacy review, consent,
+grounding, provider, and cache-isolation behavior. It remains clearly labeled as AI-generated and
+never owns authoritative calculations.
 
 ## Accessibility and motion
 
@@ -46,9 +52,10 @@ experience that expands into snapshot and insight grids only at available widths
 
 ## Current limitations
 
-- Founder Home intentionally does not add conversational AI, saved preferences, onboarding
-  persistence, or export.
-- Suggested questions are safe routes to deterministic insights, not free-form answers.
+- Founder Home has bounded in-session questions only; it does not add saved preferences, onboarding
+  persistence, export, or general-purpose chat.
+- The Guided AI Analyst supports only its documented deterministic plans and does not forecast,
+  browse, calculate custom metrics, or make autonomous recommendations.
 - The dashboard begins with the current demo or session upload; persistent projects require a later
   authorized storage phase.
 

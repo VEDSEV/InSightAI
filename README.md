@@ -1,5 +1,10 @@
 # InsightAI
 
+InsightAI includes a Guided AI Analyst on Founder Home. Ask plain-language questions about sales,
+profit, products, channels, regions, unusual activity, and what deserves attention. The experience
+routes each supported question to existing deterministic analytics and findings, then shows a concise
+answer with “How we know” and Explore paths. See [the Guided AI Analyst documentation](docs/GUIDED_AI_ANALYST.md).
+
 ## Grounded AI boundary
 
 Phase 7 AI explanations are optional and server-side. They interpret minimized, deterministic
@@ -12,10 +17,10 @@ InsightAI is an evidence-first business intelligence platform for small e-commer
 will turn order-level data into a trustworthy view of sales, profitability, customers, products,
 regions, and channels—without requiring the user to build a reporting stack by hand.
 
-> **Current status:** Phases 2 through 7 are approved and merged. Phase 8 establishes a founder-first
-> experience on top of the existing deterministic analytics, findings, upload, and grounded-AI boundaries.
-> AI remains optional and advisory; chat, authentication, persistence, forecasting, causal analysis,
-> report export, and deployment remain out of scope.
+> **Current status:** Phases 2 through 8 are approved and merged. Phase 9 adds a bounded Guided AI
+> Analyst on top of the existing deterministic analytics, findings, upload, and grounded-AI boundaries.
+> AI remains optional and advisory; authentication, persistence, forecasting, causal analysis, report
+> export, deployment, and general-purpose chat remain out of scope.
 
 ## Product principles
 

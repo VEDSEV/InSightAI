@@ -197,6 +197,8 @@ policy; it does not reimplement the underlying calculations.
 
 ## Phase 8 — Founder experience foundations
 
+**Status:** Complete, approved, committed, merged into `master`, and synchronized with origin.
+
 **Goal:** make the trusted analytics already in InsightAI understandable and useful to a small-business
 owner without removing the advanced analytical workspace.
 
@@ -218,14 +220,15 @@ owner without removing the advanced analytical workspace.
 - Advanced analytics, data checks, provenance, filters, and all existing protections remain available.
 - Default and advanced views reconcile to the same active dataset and filter context.
 
-## Phase 9 — AI chat grounded in calculated metrics
+## Phase 9 — Guided AI Analyst
 
-**Goal:** support follow-up questions within the available analytical evidence.
+**Goal:** let founders ask simple business questions that route through supported deterministic
+analytics and findings before a concise, evidence-linked answer is shown.
 
 **Deliverables**
 
-- Intent routing, metric/evidence retrieval, constrained answer generation, citations, and conversation
-  context controls.
+- Typed intent routing, deterministic analysis plans, metric/evidence retrieval, concise grounded
+  answers, and bounded in-session follow-up context.
 - Clear handling for unsupported questions, causal requests, missing metrics, and ambiguous filters.
 
 **Acceptance criteria**

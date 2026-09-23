@@ -24,6 +24,7 @@ import { EvidenceDrawer, type EvidenceSelection } from "@/features/dashboard/evi
 import { FindingDetailsDrawer } from "@/features/dashboard/finding-details-drawer";
 import { FindingsPanel } from "@/features/dashboard/findings-panel";
 import { FounderHome } from "@/features/dashboard/founder-home";
+import type { AnalystDimension } from "@/features/ai-analyst/types";
 import { KpiCard } from "@/features/dashboard/kpi-card";
 import { ProductPerformanceTable } from "@/features/dashboard/product-performance-table";
 import { SampleDataBanner } from "@/features/dashboard/sample-data-banner";
@@ -474,6 +475,17 @@ function DashboardWorkspace() {
     [changeExperience, updateFilters],
   );
 
+  const exploreAnalyst = useCallback(
+    (dimension: AnalystDimension, value: string) => {
+      if (dimension === "category") updateFilters({ category: value });
+      if (dimension === "region") updateFilters({ region: value });
+      if (dimension === "channel") updateFilters({ channel: value });
+      if (dimension === "product") updateFilters({ productId: value });
+      changeExperience("advanced");
+    },
+    [changeExperience, updateFilters],
+  );
+
   if (uploadOpen) {
     return <UploadWorkflow onComplete={completeUpload} onCancel={() => setUploadOpen(false)} />;
   }
@@ -522,8 +534,10 @@ function DashboardWorkspace() {
             uploadedDataset={Boolean(uploadedDataset)}
             uploadedFilename={uploadedDataset?.filename ?? null}
             onClearFilters={resetFilters}
+            onExploreAnalyst={exploreAnalyst}
             onOpenAdvanced={() => changeExperience("advanced")}
             onOpenUpload={openUpload}
+            onInspectAnalystEvidence={setEvidenceSelection}
             onInspectFinding={setFindingSelection}
             onInspectMetric={(metric) =>
               setEvidenceSelection(metricSelection(metric, analytics.value.filterContextLabel))

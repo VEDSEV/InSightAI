@@ -198,9 +198,21 @@ describe("Overview dashboard", () => {
     expect(screen.getByText("Jan 2024 – Dec 2025")).toBeInTheDocument();
     expect(screen.queryByText("Comparison unavailable")).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "Explore your business with InsightAI" }),
+      screen.getByRole("heading", { name: "Ask InsightAI about your business" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "What should I investigate first?" })).toBeEnabled();
+    await user.click(screen.getByRole("button", { name: "How is my business doing?" }));
+    expect(await screen.findByText(/Your business generated \$778,231.10/i)).toBeInTheDocument();
+    expect(screen.getByText("Supporting fact")).toBeInTheDocument();
+    const questionInput = screen.getByRole("textbox", {
+      name: "Ask InsightAI about your business",
+    });
+    await user.type(questionInput, "An old draft question");
+    await user.click(screen.getByRole("button", { name: "What should I look at first?" }));
+    expect(await screen.findByText(/deserves your attention first/i)).toBeInTheDocument();
+    expect(questionInput).toHaveValue("");
+    expect(screen.getByText(/You asked:/i).parentElement).toHaveTextContent(
+      "What should I look at first?",
+    );
     expect(screen.queryByLabelText("Category")).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Open advanced analytics" }));
@@ -296,5 +308,22 @@ describe("Overview dashboard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/UTF-8 CSV only/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Choose CSV" })).toBeInTheDocument();
+  });
+
+  it("clears the controlled Analyst input after both typed and suggested questions", async () => {
+    const user = userEvent.setup();
+    useDashboardAnalytics.mockReturnValue({ status: "ready", value: viewModel });
+    render(<OverviewDashboard />);
+
+    const input = screen.getByRole("textbox", { name: "Ask InsightAI about your business" });
+    expect(input).toHaveValue("");
+    expect(input).toHaveAttribute("placeholder", "Ask about your business...");
+    await user.type(input, "How is my business doing?");
+    await user.click(screen.getByRole("button", { name: "Send question" }));
+    expect(input).toHaveValue("");
+    expect(await screen.findByText(/You asked:/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "What should I look at first?" }));
+    expect(input).toHaveValue("");
   });
 });
